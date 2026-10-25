@@ -14,6 +14,9 @@ const CONFIG = {
   // 「需關注」門檻：學員平均分數低於 FLAG_AVG，或任一題被打 FLAG_ITEM 分（含）以下
   FLAG_AVG: 80,
   FLAG_ITEM: 70,
+  // 儀表板免密碼：填入試算表「設定」B3 的儀表板密碼，開啟時自動帶入，不再顯示密碼畫面
+  // （若已在 Apps Script 拿掉 data 的密碼檢查，這裡留空即可）
+  DASH_KEY: "",
 };
 </script>
 <style>
@@ -279,7 +282,7 @@ let RAW = [], ALL = [], ROSTER = {}, DEMO = false;
 let state = { from:"", to:"", pgy:"", level:"", groups:new Set(GROUPS.map(g=>g.k)), weight:"equal", sort:{k:"month",dir:-1} };
 
 /* ======================= 載入資料 ======================= */
-function getKey(){ try{ return sessionStorage.getItem("pgyDashKey") || ""; }catch(e){ return ""; } }
+function getKey(){ if (CONFIG.DASH_KEY) return CONFIG.DASH_KEY; try{ return sessionStorage.getItem("pgyDashKey") || ""; }catch(e){ return ""; } }
 function setKey(k){ try{ sessionStorage.setItem("pgyDashKey", k); }catch(e){} }
 
 async function load(k){
@@ -289,7 +292,7 @@ async function load(k){
   const j = await (await fetch(url)).json();
   document.body.classList.remove("loading");
   if (!j.ok){
-    if (j.error === "auth"){ showLogin(k ? "密碼不正確" : ""); return; }
+    if (j.error === "auth"){ showLogin(CONFIG.DASH_KEY ? "dashboard.html 的 DASH_KEY 與試算表「設定」B3 不一致" : k ? "密碼不正確" : ""); return; }
     if (j.error === "nopw"){ showLogin("請先在試算表「設定」B3 設定儀表板密碼"); return; }
     throw new Error(j.error || "讀取失敗");
   }

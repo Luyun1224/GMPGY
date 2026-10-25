@@ -265,7 +265,7 @@ pre.demo{text-align:left;background:var(--white);border:2px solid var(--ink);bor
     <div class="past-note" id="pastNote" hidden></div>
     <div class="past-note info" id="againNote" hidden></div>
     <div class="notice">
-      📌 本月有多位學員時，請<b>逐位</b>評核；若某位學員本月與您沒有共事，請勾選「本月未共事，略過」。<br>
+      📌 本月有多位學員時，請<b>逐位</b>評核。<br>
       評估者姓名僅作資料佐證，<b>不會透露給受評學員</b>，請放心作答。
     </div>
   </section>
@@ -385,10 +385,8 @@ function renderCards(){
       <h2><span>${esc(s.name)}<span class="lv">${esc(s.level)}</span></span></h2>
       <span class="card-state" id="cs${p}"></span></div>
     <div class="skip-row">
-      <label class="skip-toggle"><input type="checkbox" name="p${p}_skip"> 本月未共事，略過</label>
       <div class="quick pgy-body">快速填入：<button type="button" data-p="${p}" data-v="95">全部 95</button><button type="button" data-p="${p}" data-v="90">全部 90</button><button type="button" data-p="${p}" data-v="85">全部 85</button></div>
     </div>
-    <div class="skipped-msg">已略過 ${esc(s.name)}，不會列入評分。如需評核請取消勾選。</div>
     <div class="pgy-body">
       <p class="sec-desc">請依各項敘述給分（95 分最高）。</p>
       ${ITEMS.map((t,i) => `
