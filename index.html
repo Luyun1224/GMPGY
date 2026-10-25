@@ -30,15 +30,15 @@ const CONFIG = {
 </script>
 <style>
 :root{
-  --orange:#F26A1B; --orange-deep:#D9550B; --orange-soft:#FBD3B4;
-  --ink:#1A1A1A; --paper:#F6E9D6; --paper-2:#EFDCC2; --white:#FFFDF9;
-  --muted:#6B5A48; --line:#1A1A1A; --ok:#1F7A4D;
+  --accent:#BE98AA; --accent-deep:#795A6C; --accent-soft:#E8D7E0;
+  --ink:#3E3F4C; --paper:#F2EBEF; --paper-2:#E4D7DF; --white:#FFFCFE;
+  --muted:#68616D; --line:#3E3F4C; --ok:#1F7A4D;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
   font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);
-  background:var(--orange);
+  background:var(--accent);
   background-image:
     repeating-conic-gradient(from 0deg at 50% -10%, rgba(255,255,255,.07) 0 6deg, transparent 6deg 12deg);
   background-attachment:fixed;
@@ -51,26 +51,26 @@ body{
   border-radius:0 0 60px 0;padding:10px 22px 12px 16px;font-weight:900;line-height:1.15}
 .top-tag .m{font-size:26px;letter-spacing:1px}
 .top-tag .s{font-size:14px;font-weight:700}
-.top-tag .s b{color:var(--orange);font-weight:900}
+.top-tag .s b{color:var(--accent);font-weight:900}
 .hero{position:relative;margin:14px 0 22px;text-align:center}
-.ribbon{display:inline-block;background:var(--ink);color:var(--orange);font-weight:900;font-size:clamp(20px,4.6vw,30px);
+.ribbon{display:inline-block;background:var(--ink);color:var(--accent);font-weight:900;font-size:clamp(20px,4.6vw,30px);
   padding:6px 26px;transform:rotate(-2deg);border-radius:6px;letter-spacing:4px;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
 .title{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px}
 .circ{width:clamp(58px,13vw,92px);height:clamp(58px,13vw,92px);border:4px solid var(--ink);border-radius:50%;background:var(--white);
   display:grid;place-items:center;font-weight:900;font-size:clamp(28px,6.4vw,48px);box-shadow:4px 4px 0 var(--ink)}
 .big{font-weight:900;font-size:clamp(36px,9vw,66px);color:var(--ink);letter-spacing:2px;text-shadow:3px 3px 0 var(--white)}
-.subtitle{margin-top:10px;font-weight:700;color:#fff;font-size:15px;letter-spacing:2px}
+.subtitle{margin-top:10px;font-weight:700;color:var(--ink);font-size:15px;letter-spacing:2px}
 
 /* ---------- Paper card ---------- */
 .paper{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--ink);
   padding:26px clamp(16px,4vw,34px);position:relative;
-  background-image:linear-gradient(transparent 96%, rgba(140,100,60,.08) 96%);background-size:100% 32px}
+  background-image:linear-gradient(transparent 96%, rgba(62,63,76,.08) 96%);background-size:100% 32px}
 .paper + .paper{margin-top:28px}
 #pgyCards > .paper{margin-top:28px}
 
 /* ---------- Target card ---------- */
 .target{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.avatar{width:86px;height:86px;border-radius:50%;border:4px solid var(--ink);background:var(--orange);color:#fff;
+.avatar{width:86px;height:86px;border-radius:50%;border:4px solid var(--ink);background:var(--accent);color:var(--ink);
   display:grid;place-items:center;font-weight:900;font-size:28px;position:relative;flex:none;box-shadow:3px 3px 0 var(--ink)}
 .avatar::before{content:"";position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:62px;height:20px;
   background:var(--white);border:3px solid var(--ink);border-radius:30px 30px 6px 6px}
@@ -80,7 +80,7 @@ body{
 .roster{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .rchip{font:inherit;display:inline-flex;align-items:center;gap:8px;background:var(--white);border:2px solid var(--ink);border-radius:999px;
   padding:5px 12px 5px 6px;cursor:pointer;font-weight:900;font-size:15px;color:var(--ink)}
-.rchip:hover{background:var(--orange-soft)}
+.rchip:hover{background:var(--accent-soft)}
 .rchip .lv{background:var(--ink);color:#fff;font-size:11px;border-radius:999px;padding:2px 7px;letter-spacing:.5px}
 .rchip .st{font-size:12px;font-weight:700;color:var(--muted)}
 .rchip.done{background:#E3F2E9}
@@ -91,13 +91,13 @@ body{
   border:3px solid var(--ink);border-radius:999px;padding:4px 6px;box-shadow:3px 3px 0 rgba(0,0,0,.25)}
 .month-switch[hidden]{display:none}
 .ms-btn{font:inherit;font-weight:900;font-size:18px;line-height:1;width:30px;height:30px;border-radius:50%;border:none;
-  background:var(--orange);color:#fff;cursor:pointer}
+  background:var(--accent);color:var(--ink);cursor:pointer}
 .ms-btn:disabled{background:#555;color:#999;cursor:not-allowed}
 .ms-sel{display:flex;align-items:center;gap:6px;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px}
 .ms-sel select{font:inherit;font-size:15px;font-weight:900;color:var(--ink);background:var(--paper);border:none;border-radius:999px;
   padding:4px 10px;cursor:pointer;max-width:260px}
 .ms-sel span{white-space:nowrap}
-.past-note{margin-top:14px;background:var(--orange);color:#fff;font-weight:700;font-size:14px;border:2px solid var(--ink);
+.past-note{margin-top:14px;background:var(--accent);color:var(--ink);font-weight:700;font-size:14px;border:2px solid var(--ink);
   border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .past-note[hidden]{display:none}
 .past-note.info{background:var(--ink)}
@@ -111,11 +111,11 @@ body{
 
 /* ---------- Section headers ---------- */
 .sec-head{display:flex;align-items:center;gap:14px;margin:0 0 18px;flex-wrap:wrap}
-.no{font-weight:900;font-size:40px;line-height:1;color:var(--orange);background:var(--white);border:4px solid var(--ink);
+.no{font-weight:900;font-size:40px;line-height:1;color:var(--accent);background:var(--white);border:4px solid var(--ink);
   border-radius:10px;padding:4px 12px 6px;box-shadow:4px 4px 0 var(--ink);transform:rotate(-3deg)}
 .sec-head h2{margin:0;font-size:22px;font-weight:900;background:var(--ink);color:#fff;padding:6px 16px;border-radius:6px;transform:skewX(-6deg)}
 .sec-head h2 span{display:inline-block;transform:skewX(6deg)}
-.sec-head h2 .lv{font-size:14px;color:var(--orange);margin-left:8px}
+.sec-head h2 .lv{font-size:14px;color:var(--accent);margin-left:8px}
 .sec-desc{margin:-6px 0 16px;color:var(--muted);font-size:14px;font-weight:500}
 
 /* ---------- PGY card ---------- */
@@ -125,20 +125,20 @@ body{
 
 /* ---------- Questions ---------- */
 .q{background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:14px 14px 12px;margin-bottom:12px;transition:background .15s}
-.q.done{background:#FFF6EC}
+.q.done{background:#F7EFF3}
 .q.err{border-color:#C0262D;box-shadow:0 0 0 3px rgba(192,38,45,.2)}
 .q-title{display:flex;gap:10px;align-items:flex-start;font-weight:700;font-size:16px;line-height:1.5;margin-bottom:10px}
-.chip-no{flex:none;background:var(--orange);color:#fff;font-weight:900;font-size:13px;min-width:34px;text-align:center;
+.chip-no{flex:none;background:var(--accent);color:var(--ink);font-weight:900;font-size:13px;min-width:34px;text-align:center;
   border-radius:6px;padding:2px 6px;margin-top:2px;border:2px solid var(--ink)}
 .q-title small{display:block;font-weight:500;color:var(--muted);font-size:13px}
-.req{color:var(--orange-deep)}
+.req{color:var(--accent-deep)}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
 .opts label{position:relative}
 .opts input{position:absolute;opacity:0;pointer-events:none}
 .opts span{display:inline-block;min-width:52px;text-align:center;padding:7px 12px;border:2px solid var(--ink);border-radius:999px;
   background:var(--paper);font-weight:700;font-size:15px;cursor:pointer;user-select:none;transition:transform .08s}
-.opts span:hover{background:var(--orange-soft)}
-.opts input:checked + span{background:var(--orange);color:#fff;box-shadow:2px 2px 0 var(--ink);transform:translate(-1px,-1px)}
+.opts span:hover{background:var(--accent-soft)}
+.opts input:checked + span{background:var(--accent);color:var(--ink);box-shadow:2px 2px 0 var(--ink);transform:translate(-1px,-1px)}
 .opts input:focus-visible + span{outline:3px solid var(--ink);outline-offset:2px}
 /* 分數依「非常同意／同意／普通／不同意」分組 */
 .scale{display:flex;flex-wrap:wrap;gap:6px 14px}
@@ -147,19 +147,19 @@ body{
 .sg .opts{gap:6px}
 input[type=text],textarea{width:100%;font:inherit;font-size:16px;border:2px solid var(--ink);border-radius:10px;padding:10px 12px;background:var(--paper)}
 textarea{min-height:84px;resize:vertical}
-input[type=text]:focus,textarea:focus{outline:none;background:#fff;box-shadow:3px 3px 0 var(--orange)}
+input[type=text]:focus,textarea:focus{outline:none;background:#fff;box-shadow:3px 3px 0 var(--accent)}
 .quick{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--muted);font-weight:700}
 .quick button{font:inherit;font-size:13px;font-weight:700;background:var(--white);border:2px solid var(--ink);border-radius:6px;padding:3px 10px;cursor:pointer}
-.quick button:hover{background:var(--orange-soft)}
+.quick button:hover{background:var(--accent-soft)}
 .fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:620px){.fb-grid{grid-template-columns:1fr}}
 
 /* ---------- Progress (boat) ---------- */
-.progress{position:sticky;top:0;z-index:5;margin:-28px -16px 22px;padding:26px 16px 10px;background:rgba(242,106,27,.94);backdrop-filter:blur(4px)}
+.progress{position:sticky;top:0;z-index:5;margin:-28px -16px 22px;padding:26px 16px 10px;background:rgba(190,152,170,.94);backdrop-filter:blur(4px)}
 .track{position:relative;height:14px;background:var(--paper);border:3px solid var(--ink);border-radius:999px;max-width:820px;margin:0 auto}
 .fill{height:100%;background:var(--ink);border-radius:999px;width:0;transition:width .3s}
 .boat{position:absolute;top:-22px;left:0;transform:translateX(-50%);font-size:24px;transition:left .3s;filter:drop-shadow(1px 1px 0 #fff)}
-.ptxt{max-width:820px;margin:6px auto 0;display:flex;justify-content:space-between;color:#fff;font-weight:900;font-size:13px;letter-spacing:1px}
+.ptxt{max-width:820px;margin:6px auto 0;display:flex;justify-content:space-between;color:var(--ink);font-weight:900;font-size:13px;letter-spacing:1px}
 
 /* ---------- Submit ---------- */
 .submit-bar{text-align:center;margin-top:30px}
@@ -167,15 +167,15 @@ input[type=text]:focus,textarea:focus{outline:none;background:#fff;box-shadow:3p
   border-radius:14px;padding:14px 46px;cursor:pointer;box-shadow:6px 6px 0 var(--white);transition:transform .08s}
 .btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--white)}
 .btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.submit-sum{color:#fff;font-weight:700;font-size:14px;margin-top:12px}
-.foot{text-align:center;color:#fff;font-weight:700;font-size:13px;margin-top:22px;letter-spacing:1px}
+.submit-sum{color:var(--ink);font-weight:700;font-size:14px;margin-top:12px}
+.foot{text-align:center;color:var(--ink);font-weight:700;font-size:13px;margin-top:22px;letter-spacing:1px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;
   padding:12px 20px;border-radius:10px;font-weight:700;transition:transform .25s;z-index:20;max-width:90vw}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
 /* ---------- Done screen ---------- */
 .done-screen{display:none;text-align:center;padding:40px 10px}
-.done-screen .stamp{display:inline-block;border:5px solid var(--orange);color:var(--orange);font-weight:900;font-size:40px;
+.done-screen .stamp{display:inline-block;border:5px solid var(--accent);color:var(--accent);font-weight:900;font-size:40px;
   padding:8px 24px;border-radius:12px;transform:rotate(-8deg);letter-spacing:6px;margin-bottom:18px}
 .done-screen p{font-size:17px;font-weight:700;line-height:1.8}
 .done-screen .again{font:inherit;font-weight:900;font-size:15px;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:8px 18px;cursor:pointer;margin-top:8px}
@@ -191,9 +191,9 @@ pre.demo{text-align:left;background:var(--white);border:2px solid var(--ink);bor
 /* ---------- 管理者 ---------- */
 .admin-btn{position:absolute;top:0;right:0;font:inherit;font-weight:900;font-size:13px;letter-spacing:1px;color:#fff;background:var(--ink);
   border:2px solid var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.25)}
-.admin-btn:hover{background:#333}
+.admin-btn:hover{background:#555665}
 .admin-btn.on{background:var(--white);color:var(--ink)}
-.modal{position:fixed;inset:0;z-index:30;background:rgba(26,26,26,.55);display:flex;align-items:flex-start;justify-content:center;
+.modal{position:fixed;inset:0;z-index:30;background:rgba(62,63,76,.55);display:flex;align-items:flex-start;justify-content:center;
   padding:40px 16px;overflow-y:auto}
 .modal[hidden]{display:none}
 .modal .paper{width:100%;max-width:620px;margin:0}
@@ -209,7 +209,7 @@ pre.demo{text-align:left;background:var(--white);border:2px solid var(--ink);bor
 .mrow-actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-top:14px}
 .sched{display:flex;flex-direction:column;gap:12px;max-height:56vh;overflow-y:auto;padding:2px}
 .mblock{background:var(--white);border:2px solid var(--ink);border-radius:12px;padding:10px 12px}
-.mblock.cur{border-color:var(--orange-deep);box-shadow:0 0 0 3px rgba(242,106,27,.25)}
+.mblock.cur{border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(190,152,170,.25)}
 .mb-head{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .mb-head input{font:inherit;font-size:15px;font-weight:900;border:2px solid var(--ink);border-radius:8px;padding:5px 8px;background:var(--paper)}
 .mb-head .cnt{font-size:12px;font-weight:700;color:var(--muted);flex:1}
@@ -303,7 +303,7 @@ pre.demo{text-align:left;background:var(--white);border:2px solid var(--ink);bor
       <h3 id="adminTitle">管理者登入</h3>
       <p class="hint">登入後可設定每月受評 PGY 學員名單（寫入試算表「PGY名單」分頁）。密碼設定在試算表「設定」分頁 B4。</p>
       <form id="adminLoginForm">
-        <input type="password" id="adminPw" autocomplete="current-password" placeholder="管理者密碼">
+        <input type="password" id="adminPw" required aria-label="管理者密碼" autocomplete="current-password" placeholder="管理者密碼">
         <div class="err-msg" id="adminErr"></div>
         <button type="submit" class="mbtn" id="adminLoginBtn">登入</button>
       </form>
@@ -616,11 +616,10 @@ $("#againBtn").addEventListener("click", () => {
 });
 
 /* ---------------- 管理者：登入後編輯每月 PGY 名單（密碼存在試算表「設定」B4） ---------------- */
-const ADMIN_KEY = "pgyEvalAdmin";
-const admin = {
-  get key(){ try{ return sessionStorage.getItem(ADMIN_KEY) || ""; }catch(e){ return ""; } },
-  set key(k){ try{ k ? sessionStorage.setItem(ADMIN_KEY, k) : sessionStorage.removeItem(ADMIN_KEY); }catch(e){} },
-};
+// 僅保留於本次開啟的管理視窗，不將密碼存入瀏覽器儲存空間。
+const admin = { key: "", attempt: 0 };
+// 清除舊版可能保留的管理者密碼。
+try { sessionStorage.removeItem("pgyEvalAdmin"); } catch(e) {}
 async function adminCall(action, extra){
   if (!CONFIG.GAS_URL) throw new Error("尚未設定 GAS_URL");
   const res = await fetch(CONFIG.GAS_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
@@ -634,20 +633,24 @@ function adminErrText(j){
 }
 function setAdminUI(){
   const on = !!admin.key;
-  $("#adminBtn").textContent = on ? "🔓 管理 PGY 名單" : "🔒 管理者登入";
+  $("#adminBtn").textContent = on ? "🔓 管理者已登入" : "🔒 管理者登入";
   $("#adminBtn").classList.toggle("on", on);
 }
 function openAdmin(){
   $("#adminModal").hidden = false;
   $("#adminErr").textContent = ""; $("#adminSaveErr").textContent = "";
-  if (!CONFIG.GAS_URL){                           // 展示模式：直接編輯備用名單（不會存檔）
-    renderSched(Object.entries(state.roster).flatMap(([month, l]) => l.map(s => ({ month, ...s }))));
-    $("#adminSaveErr").textContent = "展示模式：尚未設定 GAS_URL，儲存只會套用在這次畫面。";
-    return;
-  }
-  if (admin.key) adminLoad(); else showAdminLogin();
+  admin.attempt++; admin.key = ""; setAdminUI();
+  showAdminLogin();
+  if (!CONFIG.GAS_URL) $("#adminErr").textContent = "尚未設定後端服務，無法驗證管理者密碼。";
 }
-function closeAdmin(){ $("#adminModal").hidden = true; }
+function closeAdmin(){
+  admin.attempt++;
+  admin.key = ""; setAdminUI();
+  $("#adminPw").value = "";
+  $("#adminModal").hidden = true;
+  $("#adminEdit").hidden = true;
+  $("#schedRows").replaceChildren();
+}
 function showAdminLogin(){
   $("#adminLogin").hidden = false; $("#adminEdit").hidden = true;
   $("#adminPw").value = ""; setTimeout(() => $("#adminPw").focus(), 0);
@@ -673,15 +676,6 @@ function renderSched(flat){
   $("#schedRows").innerHTML = months.map(m => mBlock(m, by[m])).join("") || `<div class="hint">尚無名單，按「＋ 新增月份」開始設定。</div>`;
   $("#adminLogin").hidden = true; $("#adminEdit").hidden = false;
 }
-async function adminLoad(){
-  $("#adminLogin").hidden = true; $("#adminEdit").hidden = false;
-  $("#schedRows").innerHTML = `<div style="font-weight:700;color:var(--muted)">載入中…</div>`;
-  try{
-    const j = await adminCall("adminLogin");
-    if (!j.ok){ admin.key = ""; setAdminUI(); showAdminLogin(); $("#adminErr").textContent = adminErrText(j); return; }
-    renderSched(j.roster);
-  }catch(e){ $("#adminSaveErr").textContent = "連線失敗：" + e.message; }
-}
 $("#adminBtn").addEventListener("click", openAdmin);
 $("#adminClose").addEventListener("click", closeAdmin);
 $("#adminModal").addEventListener("click", e => { if (e.target.id === "adminModal") closeAdmin(); });
@@ -692,12 +686,16 @@ $("#adminLoginForm").addEventListener("submit", async e => {
   const pw = $("#adminPw").value.trim();
   if (!pw){ $("#adminErr").textContent = "請輸入密碼"; return; }
   const btn = $("#adminLoginBtn"); btn.disabled = true; $("#adminErr").textContent = "";
+  const attempt = ++admin.attempt;
   try{
     admin.key = pw;
     const j = await adminCall("adminLogin");
+    if (attempt !== admin.attempt) return;
     if (!j.ok){ admin.key = ""; $("#adminErr").textContent = adminErrText(j); return; }
+    if ($("#adminModal").hidden) { admin.key = ""; return; }
+    $("#adminPw").value = "";
     setAdminUI(); renderSched(j.roster);
-  }catch(err){ admin.key = ""; $("#adminErr").textContent = "連線失敗：" + err.message; }
+  }catch(err){ if (attempt !== admin.attempt) return; admin.key = ""; $("#adminErr").textContent = "連線失敗：" + err.message; }
   finally{ btn.disabled = false; }
 });
 $("#adminLogout").addEventListener("click", () => { admin.key = ""; setAdminUI(); closeAdmin(); toast("已登出管理者"); });
@@ -752,7 +750,7 @@ $("#adminSave").addEventListener("click", async () => {
     applyConfig(cfg);
     if (keep && r[keep]) setMonth(keep);
   };
-  if (!CONFIG.GAS_URL){ apply(roster); renderSched(roster); toast("展示模式：名單已套用到畫面（未寫入試算表）"); return; }
+  if (!CONFIG.GAS_URL || !admin.key){ showAdminLogin(); $("#adminErr").textContent = "請先登入管理者"; return; }
   const btn = $("#adminSave"); btn.disabled = true; btn.textContent = "儲存中…";
   try{
     const j = await adminCall("adminSave", { roster });

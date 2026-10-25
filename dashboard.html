@@ -18,14 +18,14 @@ const CONFIG = {
 </script>
 <style>
 :root{
-  --orange:#F26A1B; --ink:#1A1A1A; --paper:#F6E9D6; --card:#FFFDF9; --muted:#6B5A48; --hair:#E4D3BC;
+  --accent:#BE98AA; --ink:#3E3F4C; --paper:#F2EBEF; --card:#FFFCFE; --muted:#68616D; --hair:#D9CBD4;
   /* 評核者身分（固定顏色，跟著身分走，不跟排名走） */
   --g-nurse:#1baf7a; --g-cr:#2a78d6; --g-other:#9A8F84;
   --up:#1F7A4D; --down:#B4361C;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:var(--orange);
+body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:var(--accent);
   background-image:repeating-conic-gradient(from 0deg at 50% -10%, rgba(255,255,255,.07) 0 6deg, transparent 6deg 12deg);
   background-attachment:fixed;min-height:100vh;padding:0 16px 60px}
 .wrap{max-width:1180px;margin:0 auto}
@@ -34,12 +34,12 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
 .circ{width:58px;height:58px;border:4px solid var(--ink);border-radius:50%;background:var(--card);display:grid;place-items:center;
   font-weight:900;font-size:30px;box-shadow:3px 3px 0 var(--ink)}
 .big{font-weight:900;font-size:clamp(28px,5vw,44px);text-shadow:3px 3px 0 var(--card);margin-left:4px}
-.tag{background:var(--ink);color:var(--orange);font-weight:900;padding:4px 14px;border-radius:6px;transform:rotate(-2deg);
+.tag{background:var(--ink);color:var(--accent);font-weight:900;padding:4px 14px;border-radius:6px;transform:rotate(-2deg);
   display:inline-block;letter-spacing:3px;font-size:15px;margin-bottom:8px}
-.sub{color:#fff;font-weight:700;font-size:13px;letter-spacing:2px;margin-top:6px}
-.hdr-right{color:#fff;font-weight:700;font-size:13px;text-align:right}
+.sub{color:var(--ink);font-weight:700;font-size:13px;letter-spacing:2px;margin-top:6px}
+.hdr-right{color:var(--ink);font-weight:700;font-size:13px;text-align:right}
 .hdr-right button{font:inherit;font-weight:900;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;margin-left:8px}
-.demo-tag{display:inline-block;background:var(--ink);color:var(--orange);border-radius:6px;padding:2px 8px;margin-right:6px}
+.demo-tag{display:inline-block;background:var(--ink);color:var(--accent);border-radius:6px;padding:2px 8px;margin-right:6px}
 
 /* filter row */
 .filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--ink);color:#fff;border-radius:14px;
@@ -53,10 +53,10 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
 .chips span i{width:10px;height:10px;border-radius:3px;background:#555}
 .chips input:checked + span{border-color:#fff;color:#fff}
 .chips input:checked + span i{background:var(--c)}
-.chips input:focus-visible + span{outline:2px solid var(--orange)}
+.chips input:focus-visible + span{outline:2px solid var(--accent)}
 .seg{display:inline-flex;border:2px solid #555;border-radius:999px;overflow:hidden}
 .seg button{font:inherit;font-size:12px;font-weight:700;border:none;background:none;color:#bbb;padding:4px 10px;cursor:pointer}
-.seg button.on{background:var(--orange);color:#fff}
+.seg button.on{background:var(--accent);color:var(--ink)}
 
 /* cards */
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
@@ -65,7 +65,7 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
 .span12{grid-column:span 12}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}
 @media (max-width:900px){.span7,.span6,.span5{grid-column:span 12}}
 .card h2{margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:10px}
-.card h2 .no{background:var(--ink);color:var(--orange);font-size:13px;padding:2px 8px;border-radius:5px}
+.card h2 .no{background:var(--ink);color:var(--accent);font-size:13px;padding:2px 8px;border-radius:5px}
 .card .desc{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.6}
 
 /* KPI */
@@ -95,12 +95,12 @@ th{text-align:left;font-weight:900;font-size:12px;color:var(--muted);border-bott
 th.num,td.num{text-align:right}
 th[aria-sort="ascending"]::after{content:" ▲"}th[aria-sort="descending"]::after{content:" ▼"}
 td{padding:7px 8px;border-bottom:1px solid var(--hair);white-space:nowrap}
-tr:hover td{background:#FFF3E6}
-tr.sel td{background:#FDE3CF}
+tr:hover td{background:#F7EFF3}
+tr.sel td{background:#E8D7E0}
 .p-name{font-weight:900}
 .lv{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:var(--ink);color:#fff}
 .idxbar{display:inline-block;height:8px;border-radius:0 4px 4px 0;background:var(--ink);vertical-align:middle;margin-right:6px}
-.flag{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:#FDE3CF;color:#8F3407;margin-left:4px}
+.flag{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:#E8D7E0;color:#795A6C;margin-left:4px}
 .flag.warn{background:#B4361C;color:#fff}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .delta.up{color:var(--up)}.delta.down{color:var(--down)}
@@ -110,7 +110,7 @@ tr.sel td{background:#FDE3CF}
 .hm .h{font-weight:900;color:var(--muted);text-align:center;padding:4px 2px;font-size:12px}
 .hm .rl{padding:6px 6px 6px 0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hm .c{border-radius:4px;text-align:center;padding:6px 2px;font-weight:700;font-variant-numeric:tabular-nums;cursor:default}
-.hm .c.na{background:repeating-linear-gradient(45deg,#f1e6d6 0 4px,#fbf4ea 4px 8px);color:var(--muted)}
+.hm .c.na{background:repeating-linear-gradient(45deg,#E4D7DF 0 4px,#F7EFF3 4px 8px);color:var(--muted)}
 
 /* strengths */
 .sw{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -153,7 +153,7 @@ tr.sel td{background:#FDE3CF}
 .login input{font:inherit;font-size:18px;width:100%;border:3px solid var(--ink);border-radius:10px;padding:10px 12px;margin:14px 0;background:var(--paper)}
 .login button{font:inherit;font-weight:900;font-size:18px;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:10px 30px;cursor:pointer}
 .err{color:var(--down);font-weight:700;font-size:13px;min-height:18px}
-.foot{text-align:center;color:#fff;font-weight:700;font-size:13px;margin-top:26px;letter-spacing:1px}
+.foot{text-align:center;color:var(--ink);font-weight:700;font-size:13px;margin-top:26px;letter-spacing:1px}
 .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
 </style>
 </head>
@@ -226,7 +226,7 @@ tr.sel td{background:#FDE3CF}
       </section>
     </div>
 
-    <p class="note" style="color:#fff;margin-top:22px" id="footNote"></p>
+    <p class="note" style="color:var(--ink);margin-top:22px" id="footNote"></p>
   </main>
   <div class="foot">奇美醫院教學部●一般內科</div>
 </div>
@@ -462,10 +462,10 @@ function renderMonthly(rows){
     const cx = m.l + step*i + step/2;
     if (k.month !== lastMonth && i > 0) s += `<line x1="${m.l+step*i}" x2="${m.l+step*i}" y1="${m.t}" y2="${H-m.b+38}" stroke="var(--hair)" stroke-width="2"/>`;
     const dim = state.pgy && k.pgy !== state.pgy;
-    if (state.pgy && !dim) s += `<rect x="${cx-step/2+3}" y="${m.t-4}" width="${step-6}" height="${ih+44}" rx="8" fill="#FDE3CF"/>`;
+    if (state.pgy && !dim) s += `<rect x="${cx-step/2+3}" y="${m.t-4}" width="${step-6}" height="${ih+44}" rx="8" fill="#E8D7E0"/>`;
     s += `<g opacity="${dim ? .3 : 1}">`;
     const pts = k.g.filter(x=>x.v!=null);
-    if (pts.length > 1){ const vs = pts.map(x=>x.v); s += `<line x1="${cx}" x2="${cx}" y1="${y(Math.max(...vs))}" y2="${y(Math.min(...vs))}" stroke="#B9A78F" stroke-width="2"/>`; }
+    if (pts.length > 1){ const vs = pts.map(x=>x.v); s += `<line x1="${cx}" x2="${cx}" y1="${y(Math.max(...vs))}" y2="${y(Math.min(...vs))}" stroke="#A28D9C" stroke-width="2"/>`; }
     const n = pts.length; pts.forEach((x,j) => {
       const ox = cx + (j-(n-1)/2)*7;
       s += `<circle cx="${ox}" cy="${y(x.v)}" r="5.5" fill="${x.g.c}" stroke="var(--card)" stroke-width="2"/>`;
@@ -527,13 +527,15 @@ function itemStats(rows){
     byG: Object.fromEntries(GROUPS.map(g => { const rs = rows.filter(r=>r.group===g.k); return [g.k, {n:rs.length, v: rs.length ? mean(rs.map(r=>r.a[i])) : null}]; })),
     all: agg(rows, r=>r.a[i]) }));
 }
-function heatColor(v){ // 單一橘色色階：分數越高越深（70→淺、95→深）
+function heatColor(v){ // 粉紅至深灰藍色階：分數越高越深（70→淺、95→深）
   if (v==null) return null;
   const t = Math.max(0, Math.min(1, (v-70)/25));
-  const L = [ [247,236,222], [242,146,79], [143,52,7] ];
+  const L = [ [242,235,239], [190,152,170], [62,63,76] ];
   const mix = (a,b,u)=>a.map((x,i)=>Math.round(x+(b[i]-x)*u));
   const c = t<.5 ? mix(L[0],L[1],t*2) : mix(L[1],L[2],(t-.5)*2);
-  return {bg:`rgb(${c})`, fg: t>.55 ? "#fff" : "var(--ink)"};
+  const linear = c.map(v => { const s = v / 255; return s <= .04045 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4; });
+  const luminance = linear[0] * .2126 + linear[1] * .7152 + linear[2] * .0722;
+  return {bg:`rgb(${c})`, fg: luminance < .179 ? "#fff" : "#000"};
 }
 function renderHeatmap(rows){
   const f = focus(rows), gs = GROUPS.filter(g => state.groups.has(g.k) && f.some(r=>r.group===g.k));
