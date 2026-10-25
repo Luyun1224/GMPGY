@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PGY 學員評核儀表板</title>
+<title>一般內科 PGY 學員評核儀表板</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -161,19 +161,14 @@ tr.sel td{background:#FDE3CF}
 <div class="wrap">
   <header>
     <div>
-      <div class="tag">360° 評核分析</div>
-      <div class="brand"><div class="circ">P</div><div class="circ">G</div><div class="circ">Y</div><div class="big">學員評核儀表板</div></div>
+      <div class="tag">一般內科 360° 評核分析</div>
+      <div class="brand"><div class="circ">P</div><div class="circ">G</div><div class="circ">Y</div><div class="big">一般內科學員評核儀表板</div></div>
       <div class="sub">PGY MONTHLY EVALUATION DASHBOARD・護理長 × 總醫師</div>
     </div>
     <div class="hdr-right"><span id="updated"></span><button id="reload" type="button">重新整理</button></div>
   </header>
 
-  <div id="loginBox" class="card login" hidden>
-    <h2 style="justify-content:center">請輸入儀表板密碼</h2>
-    <input type="password" id="pw" autocomplete="current-password" placeholder="密碼">
-    <div class="err" id="pwErr"></div>
-    <button id="pwBtn" type="button">進入</button>
-  </div>
+  <div id="loadError" class="card" role="alert" hidden></div>
 
   <main id="main" hidden>
     <div class="filters" role="group" aria-label="篩選">
@@ -279,40 +274,36 @@ let RAW = [], ALL = [], ROSTER = {}, DEMO = false;
 let state = { from:"", to:"", pgy:"", level:"", groups:new Set(GROUPS.map(g=>g.k)), weight:"equal", sort:{k:"month",dir:-1} };
 
 /* ======================= 載入資料 ======================= */
-function getKey(){ try{ return sessionStorage.getItem("pgyDashKey") || ""; }catch(e){ return ""; } }
-function setKey(k){ try{ sessionStorage.setItem("pgyDashKey", k); }catch(e){} }
-
-async function load(k){
+async function load(){
   if (!CONFIG.GAS_URL){ DEMO = true; return ready(demoData()); }
+  $("#loadError").hidden = true;
   document.body.classList.add("loading");
-  const url = CONFIG.GAS_URL + "?action=data&key=" + encodeURIComponent(k || "");
+  const url = CONFIG.GAS_URL + "?action=data";
   const j = await (await fetch(url)).json();
   document.body.classList.remove("loading");
   if (!j.ok){
-    if (j.error === "auth"){ showLogin(k ? "密碼不正確" : ""); return; }
-    if (j.error === "nopw"){ showLogin("請先在試算表「設定」B3 設定儀表板密碼"); return; }
+    if (j.error === "auth" || j.error === "nopw") throw new Error("後端尚未開放免密碼讀取，請更新 Google Apps Script 的 data 動作權限設定。");
     throw new Error(j.error || "讀取失敗");
   }
-  setKey(k || "");
   ready(j);
 }
 function ready(j){
   ROSTER = j.roster || {};
   ALL = parse(j);
   RAW = ALL.filter(r => r.scored);
-  $("#loginBox").hidden = true; $("#main").hidden = false;
+  $("#loadError").hidden = true; $("#main").hidden = false;
   const now = new Date();
   $("#updated").innerHTML = (DEMO ? `<span class="demo-tag">展示資料</span>` : "") +
     `資料更新：${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}・共 ${RAW.length} 份評分`;
   initFilters(); render();
 }
-function showLogin(msg){
-  $("#main").hidden = true; $("#loginBox").hidden = false; $("#pwErr").textContent = msg || ""; $("#pw").focus();
+$("#reload").addEventListener("click", () => load().catch(fail));
+function fail(e){
+  console.error(e);
+  $("#loadError").textContent = "讀取資料失敗：" + e.message;
+  $("#loadError").hidden = false;
+  document.body.classList.remove("loading");
 }
-$("#pwBtn").addEventListener("click", () => load($("#pw").value.trim()).catch(fail));
-$("#pw").addEventListener("keydown", e => { if (e.key === "Enter") $("#pwBtn").click(); });
-$("#reload").addEventListener("click", () => load(getKey()).catch(fail));
-function fail(e){ console.error(e); alert("讀取資料失敗：" + e.message); document.body.classList.remove("loading"); }
 
 function parse(j){
   const H = j.headers, ix = n => H.indexOf(n);
@@ -695,7 +686,7 @@ function demoData(){
 }
 
 /* ======================= 啟動 ======================= */
-load(getKey()).catch(fail);
+load().catch(fail);
 </script>
 </body>
 </html>

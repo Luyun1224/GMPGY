@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PGY學員月評核</title>
+<title>一般內科 PGY學員月評核</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -85,7 +85,6 @@ body{
 .rchip .st{font-size:12px;font-weight:700;color:var(--muted)}
 .rchip.done{background:#E3F2E9}
 .rchip.done .st{color:var(--ok)}
-.rchip.skip{opacity:.6;text-decoration:line-through}
 .notice{margin-top:18px;background:var(--white);border:2px dashed var(--ink);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.7}
 
 .month-switch{position:absolute;top:-18px;right:18px;display:flex;align-items:center;gap:6px;background:var(--ink);
@@ -120,14 +119,7 @@ body{
 .sec-desc{margin:-6px 0 16px;color:var(--muted);font-size:14px;font-weight:500}
 
 /* ---------- PGY card ---------- */
-.pgy-card .skip-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:-4px 0 14px}
-.skip-toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;cursor:pointer;background:var(--white);
-  border:2px solid var(--ink);border-radius:999px;padding:4px 12px}
-.skip-toggle input{width:16px;height:16px;accent-color:var(--ink)}
-.pgy-card.skipped .pgy-body{display:none}
-.pgy-card.skipped{background:var(--paper-2)}
-.skipped-msg{display:none;font-weight:700;color:var(--muted);font-size:14px}
-.pgy-card.skipped .skipped-msg{display:block}
+.pgy-card .quick-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:-4px 0 14px}
 .card-state{font-size:13px;font-weight:900;color:var(--muted)}
 .card-state.ok{color:var(--ok)}
 
@@ -238,9 +230,9 @@ pre.demo{text-align:left;background:var(--white);border:2px solid var(--ink);bor
   <div class="top-tag"><span class="m" id="tagMonth">—</span><span class="s">一般內科 × <b>教學部</b></span></div>
 
   <header class="hero">
-    <div class="ribbon">每月評核</div>
+    <div class="ribbon">一般內科每月評核</div>
     <div class="title">
-      <div class="circ">P</div><div class="circ">G</div><div class="circ">Y</div><div class="big">學員評核</div>
+      <div class="circ">P</div><div class="circ">G</div><div class="circ">Y</div><div class="big">一般內科學員評核</div>
     </div>
     <div class="subtitle">PGY MONTHLY EVALUATION</div>
   </header>
@@ -265,7 +257,7 @@ pre.demo{text-align:left;background:var(--white);border:2px solid var(--ink);bor
     <div class="past-note" id="pastNote" hidden></div>
     <div class="past-note info" id="againNote" hidden></div>
     <div class="notice">
-      📌 本月有多位學員時，請<b>逐位</b>評核；若某位學員本月與您沒有共事，請勾選「本月未共事，略過」。<br>
+      📌 本月有多位學員時，請<b>逐位</b>評核；請完成每位學員的所有必填評分。<br>
       評估者姓名僅作資料佐證，<b>不會透露給受評學員</b>，請放心作答。
     </div>
   </section>
@@ -384,11 +376,9 @@ function renderCards(){
     <div class="sec-head"><div class="no">${String(p+2).padStart(2,"0")}</div>
       <h2><span>${esc(s.name)}<span class="lv">${esc(s.level)}</span></span></h2>
       <span class="card-state" id="cs${p}"></span></div>
-    <div class="skip-row">
-      <label class="skip-toggle"><input type="checkbox" name="p${p}_skip"> 本月未共事，略過</label>
+    <div class="quick-row">
       <div class="quick pgy-body">快速填入：<button type="button" data-p="${p}" data-v="95">全部 95</button><button type="button" data-p="${p}" data-v="90">全部 90</button><button type="button" data-p="${p}" data-v="85">全部 85</button></div>
     </div>
-    <div class="skipped-msg">已略過 ${esc(s.name)}，不會列入評分。如需評核請取消勾選。</div>
     <div class="pgy-body">
       <p class="sec-desc">請依各項敘述給分（95 分最高）。</p>
       ${ITEMS.map((t,i) => `
@@ -537,8 +527,7 @@ function val(name){
   const el = document.querySelector(`[name="${name}"]:checked`) || document.querySelector(`[name="${name}"]:not([type=radio]):not([type=checkbox])`);
   return el ? el.value.trim() : "";
 }
-const isSkip = p => !!document.querySelector(`[name="p${p}_skip"]:checked`);
-const active = () => state.list.map((_,p)=>p).filter(p => !isSkip(p));
+const active = () => state.list.map((_,p)=>p);
 function required(){
   return ["evaluator","role", ...active().flatMap(p => ITEMS.map((_,i)=>itemName(p,i)))];
 }
@@ -557,16 +546,15 @@ function update(){
 
   // 學員卡片狀態與上方名單
   $("#rosterChips").innerHTML = state.list.map((s,p) => {
-    const skip = isSkip(p), done = ITEMS.filter((_,i)=>val(itemName(p,i))).length;
-    document.getElementById("card"+p)?.classList.toggle("skipped", skip);
+    const done = ITEMS.filter((_,i)=>val(itemName(p,i))).length;
     const cs = document.getElementById("cs"+p);
-    if (cs){ cs.textContent = skip ? "略過" : done === ITEMS.length ? "✓ 已完成" : `${done} / ${ITEMS.length}`; cs.classList.toggle("ok", !skip && done === ITEMS.length); }
-    const cls = skip ? "skip" : done === ITEMS.length ? "done" : "";
-    const st = skip ? "略過" : done === ITEMS.length ? "✓" : `${done}/${ITEMS.length}`;
+    if (cs){ cs.textContent = done === ITEMS.length ? "✓ 已完成" : `${done} / ${ITEMS.length}`; cs.classList.toggle("ok", done === ITEMS.length); }
+    const cls = done === ITEMS.length ? "done" : "";
+    const st = done === ITEMS.length ? "✓" : `${done}/${ITEMS.length}`;
     return `<button type="button" class="rchip ${cls}" data-p="${p}"><span class="lv">${esc(s.level)}</span>${esc(s.name)}<span class="st">${st}</span></button>`;
   }).join("");
   const a = active().length;
-  $("#submitSum").textContent = state.list.length ? `將送出 ${a} 位學員的評核${a < state.list.length ? `（略過 ${state.list.length - a} 位）` : ""}` : "";
+  $("#submitSum").textContent = state.list.length ? `將送出 ${a} 位學員的評核` : "";
 }
 $("#rosterChips").addEventListener("click", e => {
   const b = e.target.closest(".rchip"); if (!b) return;
@@ -581,7 +569,6 @@ function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("sh
 $("#form").addEventListener("submit", e => {
   e.preventDefault();
   if (!state.list.length){ toast("本月尚未設定受評學員"); return; }
-  if (!active().length){ toast("至少需評核一位學員（目前全部略過）"); return; }
   const missing = required().filter(k => !val(k));
   missing.forEach(k => document.querySelector(`[data-q="${k}"]`)?.classList.add("err"));
   if (missing.length){
@@ -592,11 +579,10 @@ $("#form").addEventListener("submit", e => {
   const base = { "評核月份": state.month, "評估者姓名": val("evaluator"), "評估者身分": val("role") };
   const rows = state.list.map((s,p) => {
     const row = Object.assign({ "受評學員": s.name, "學員職別": s.level }, base);
-    const skip = isSkip(p);
-    row["狀態"] = skip ? "未共事" : "已評核";
-    ITEMS.forEach((t,i) => row[t] = skip ? "" : val(itemName(p,i)));
-    row["表現優良之處"] = skip ? "" : val(`p${p}_good`);
-    row["建議加強之處"] = skip ? "" : val(`p${p}_imp`);
+    row["狀態"] = "已評核";
+    ITEMS.forEach((t,i) => row[t] = val(itemName(p,i)));
+    row["表現優良之處"] = val(`p${p}_good`);
+    row["建議加強之處"] = val(`p${p}_imp`);
     return row;
   });
 
