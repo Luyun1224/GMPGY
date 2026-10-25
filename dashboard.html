@@ -18,9 +18,9 @@ const CONFIG = {
 </script>
 <style>
 :root{
-  --accent:#BE98AA; --ink:#3E3F4C; --paper:#F2EBEF; --card:#FFFCFE; --muted:#68616D; --hair:#D9CBD4;
+  --accent:#EC7180; --brand:#4C15B7; --secondary:#CC21C0; --ink:#191919; --paper:#FFF0F3; --card:#FFFAFD; --muted:#645366; --hair:#E4BED7;
   /* 評核者身分（固定顏色，跟著身分走，不跟排名走） */
-  --g-nurse:#1baf7a; --g-cr:#2a78d6; --g-other:#9A8F84;
+  --g-nurse:#CC21C0; --g-cr:#4C15B7; --g-other:#766779;
   --up:#1F7A4D; --down:#B4361C;
 }
 *{box-sizing:border-box}
@@ -38,7 +38,7 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
   display:inline-block;letter-spacing:3px;font-size:15px;margin-bottom:8px}
 .sub{color:var(--ink);font-weight:700;font-size:13px;letter-spacing:2px;margin-top:6px}
 .hdr-right{color:var(--ink);font-weight:700;font-size:13px;text-align:right}
-.hdr-right button{font:inherit;font-weight:900;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;margin-left:8px}
+.hdr-right button{font:inherit;font-weight:900;background:var(--brand);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;margin-left:8px}
 .demo-tag{display:inline-block;background:var(--ink);color:var(--accent);border-radius:6px;padding:2px 8px;margin-right:6px}
 
 /* filter row */
@@ -56,7 +56,7 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
 .chips input:focus-visible + span{outline:2px solid var(--accent)}
 .seg{display:inline-flex;border:2px solid #555;border-radius:999px;overflow:hidden}
 .seg button{font:inherit;font-size:12px;font-weight:700;border:none;background:none;color:#bbb;padding:4px 10px;cursor:pointer}
-.seg button.on{background:var(--accent);color:var(--ink)}
+.seg button.on{background:var(--secondary);color:#fff}
 
 /* cards */
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
@@ -65,7 +65,7 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
 .span12{grid-column:span 12}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}
 @media (max-width:900px){.span7,.span6,.span5{grid-column:span 12}}
 .card h2{margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:10px}
-.card h2 .no{background:var(--ink);color:var(--accent);font-size:13px;padding:2px 8px;border-radius:5px}
+.card h2 .no{background:var(--brand);color:#fff;font-size:13px;padding:2px 8px;border-radius:5px}
 .card .desc{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.6}
 
 /* KPI */
@@ -95,12 +95,12 @@ th{text-align:left;font-weight:900;font-size:12px;color:var(--muted);border-bott
 th.num,td.num{text-align:right}
 th[aria-sort="ascending"]::after{content:" ▲"}th[aria-sort="descending"]::after{content:" ▼"}
 td{padding:7px 8px;border-bottom:1px solid var(--hair);white-space:nowrap}
-tr:hover td{background:#F7EFF3}
-tr.sel td{background:#E8D7E0}
+tr:hover td{background:#FCE5F3}
+tr.sel td{background:#F8C1D8}
 .p-name{font-weight:900}
 .lv{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:var(--ink);color:#fff}
 .idxbar{display:inline-block;height:8px;border-radius:0 4px 4px 0;background:var(--ink);vertical-align:middle;margin-right:6px}
-.flag{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:#E8D7E0;color:#795A6C;margin-left:4px}
+.flag{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:#F8C1D8;color:#4C15B7;margin-left:4px}
 .flag.warn{background:#B4361C;color:#fff}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .delta.up{color:var(--up)}.delta.down{color:var(--down)}
@@ -110,7 +110,7 @@ tr.sel td{background:#E8D7E0}
 .hm .h{font-weight:900;color:var(--muted);text-align:center;padding:4px 2px;font-size:12px}
 .hm .rl{padding:6px 6px 6px 0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hm .c{border-radius:4px;text-align:center;padding:6px 2px;font-weight:700;font-variant-numeric:tabular-nums;cursor:default}
-.hm .c.na{background:repeating-linear-gradient(45deg,#E4D7DF 0 4px,#F7EFF3 4px 8px);color:var(--muted)}
+.hm .c.na{background:repeating-linear-gradient(45deg,#F4D5E9 0 4px,#FCE5F3 4px 8px);color:var(--muted)}
 
 /* strengths */
 .sw{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -462,10 +462,10 @@ function renderMonthly(rows){
     const cx = m.l + step*i + step/2;
     if (k.month !== lastMonth && i > 0) s += `<line x1="${m.l+step*i}" x2="${m.l+step*i}" y1="${m.t}" y2="${H-m.b+38}" stroke="var(--hair)" stroke-width="2"/>`;
     const dim = state.pgy && k.pgy !== state.pgy;
-    if (state.pgy && !dim) s += `<rect x="${cx-step/2+3}" y="${m.t-4}" width="${step-6}" height="${ih+44}" rx="8" fill="#E8D7E0"/>`;
+    if (state.pgy && !dim) s += `<rect x="${cx-step/2+3}" y="${m.t-4}" width="${step-6}" height="${ih+44}" rx="8" fill="#F8C1D8"/>`;
     s += `<g opacity="${dim ? .3 : 1}">`;
     const pts = k.g.filter(x=>x.v!=null);
-    if (pts.length > 1){ const vs = pts.map(x=>x.v); s += `<line x1="${cx}" x2="${cx}" y1="${y(Math.max(...vs))}" y2="${y(Math.min(...vs))}" stroke="#A28D9C" stroke-width="2"/>`; }
+    if (pts.length > 1){ const vs = pts.map(x=>x.v); s += `<line x1="${cx}" x2="${cx}" y1="${y(Math.max(...vs))}" y2="${y(Math.min(...vs))}" stroke="#9D66BD" stroke-width="2"/>`; }
     const n = pts.length; pts.forEach((x,j) => {
       const ox = cx + (j-(n-1)/2)*7;
       s += `<circle cx="${ox}" cy="${y(x.v)}" r="5.5" fill="${x.g.c}" stroke="var(--card)" stroke-width="2"/>`;
@@ -527,12 +527,13 @@ function itemStats(rows){
     byG: Object.fromEntries(GROUPS.map(g => { const rs = rows.filter(r=>r.group===g.k); return [g.k, {n:rs.length, v: rs.length ? mean(rs.map(r=>r.a[i])) : null}]; })),
     all: agg(rows, r=>r.a[i]) }));
 }
-function heatColor(v){ // 粉紅至深灰藍色階：分數越高越深（70→淺、95→深）
+function heatColor(v){ // 珊瑚紅、桃紫至深紫色階：分數越高越深（70→淺、95→深）
   if (v==null) return null;
   const t = Math.max(0, Math.min(1, (v-70)/25));
-  const L = [ [242,235,239], [190,152,170], [62,63,76] ];
+  const L = [ [255,240,243], [236,113,128], [204,33,192], [76,21,183] ];
   const mix = (a,b,u)=>a.map((x,i)=>Math.round(x+(b[i]-x)*u));
-  const c = t<.5 ? mix(L[0],L[1],t*2) : mix(L[1],L[2],(t-.5)*2);
+  const step = Math.min(L.length - 2, Math.floor(t * (L.length - 1)));
+  const c = mix(L[step], L[step + 1], t * (L.length - 1) - step);
   const linear = c.map(v => { const s = v / 255; return s <= .04045 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4; });
   const luminance = linear[0] * .2126 + linear[1] * .7152 + linear[2] * .0722;
   return {bg:`rgb(${c})`, fg: luminance < .179 ? "#fff" : "#000"};
