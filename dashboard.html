@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PGY 學員評核儀表板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script>
+const CONFIG = {
+  // 與 pgy.html 相同的 Apps Script 網址；留空 = 展示模式（使用內建範例資料）
+  GAS_URL: "https://script.google.com/macros/s/AKfycbzfNfYpDE7_j01CwYJHDnOKUzcZzMBIzAhTj8gQpFf2ug3p9_1Z837BmOIM1kg2DCYP/exec",
+  // 「需關注」門檻：學員平均分數低於 FLAG_AVG，或任一題被打 FLAG_ITEM 分（含）以下
+  FLAG_AVG: 80,
+  FLAG_ITEM: 70,
+};
+</script>
+<style>
+:root{
+  --orange:#F26A1B; --ink:#1A1A1A; --paper:#F6E9D6; --card:#FFFDF9; --muted:#6B5A48; --hair:#E4D3BC;
+  /* 評核者身分（固定顏色，跟著身分走，不跟排名走） */
+  --g-nurse:#1baf7a; --g-cr:#2a78d6; --g-other:#9A8F84;
+  --up:#1F7A4D; --down:#B4361C;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:var(--orange);
+  background-image:repeating-conic-gradient(from 0deg at 50% -10%, rgba(255,255,255,.07) 0 6deg, transparent 6deg 12deg);
+  background-attachment:fixed;min-height:100vh;padding:0 16px 60px}
+.wrap{max-width:1180px;margin:0 auto}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:26px 0 18px}
+.brand{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.circ{width:58px;height:58px;border:4px solid var(--ink);border-radius:50%;background:var(--card);display:grid;place-items:center;
+  font-weight:900;font-size:30px;box-shadow:3px 3px 0 var(--ink)}
+.big{font-weight:900;font-size:clamp(28px,5vw,44px);text-shadow:3px 3px 0 var(--card);margin-left:4px}
+.tag{background:var(--ink);color:var(--orange);font-weight:900;padding:4px 14px;border-radius:6px;transform:rotate(-2deg);
+  display:inline-block;letter-spacing:3px;font-size:15px;margin-bottom:8px}
+.sub{color:#fff;font-weight:700;font-size:13px;letter-spacing:2px;margin-top:6px}
+.hdr-right{color:#fff;font-weight:700;font-size:13px;text-align:right}
+.hdr-right button{font:inherit;font-weight:900;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;margin-left:8px}
+.demo-tag{display:inline-block;background:var(--ink);color:var(--orange);border-radius:6px;padding:2px 8px;margin-right:6px}
+
+/* filter row */
+.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--ink);color:#fff;border-radius:14px;
+  padding:12px 16px;margin-bottom:20px;position:sticky;top:8px;z-index:10;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
+.f{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;flex-wrap:wrap}
+.f select{font:inherit;font-size:14px;font-weight:700;border:none;border-radius:8px;padding:5px 8px;background:var(--paper);color:var(--ink);max-width:180px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:2px solid #555;font-size:13px;color:#bbb}
+.chips span i{width:10px;height:10px;border-radius:3px;background:#555}
+.chips input:checked + span{border-color:#fff;color:#fff}
+.chips input:checked + span i{background:var(--c)}
+.chips input:focus-visible + span{outline:2px solid var(--orange)}
+.seg{display:inline-flex;border:2px solid #555;border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-size:12px;font-weight:700;border:none;background:none;color:#bbb;padding:4px 10px;cursor:pointer}
+.seg button.on{background:var(--orange);color:#fff}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--ink);padding:18px 20px;min-width:0;transition:opacity .2s}
+.loading .card{opacity:.55}
+.span12{grid-column:span 12}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}
+@media (max-width:900px){.span7,.span6,.span5{grid-column:span 12}}
+.card h2{margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:10px}
+.card h2 .no{background:var(--ink);color:var(--orange);font-size:13px;padding:2px 8px;border-radius:5px}
+.card .desc{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.6}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:3px solid var(--ink);border-radius:14px;padding:12px 14px;box-shadow:4px 4px 0 var(--ink)}
+.kpi .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px}
+.kpi .v{font-size:30px;font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:14px;color:var(--muted);font-weight:700}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.legend i.bar{width:14px;height:3px;border-radius:2px;background:var(--ink)}
+
+svg text{font-family:"Noto Sans TC",sans-serif}
+.axis text{font-size:11px;fill:var(--muted)}
+.grid-line{stroke:var(--hair);stroke-width:1}
+.hit{fill:transparent;cursor:pointer}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:900;font-size:12px;color:var(--muted);border-bottom:2px solid var(--ink);padding:6px 8px;white-space:nowrap;cursor:pointer;user-select:none}
+th.num,td.num{text-align:right}
+th[aria-sort="ascending"]::after{content:" ▲"}th[aria-sort="descending"]::after{content:" ▼"}
+td{padding:7px 8px;border-bottom:1px solid var(--hair);white-space:nowrap}
+tr:hover td{background:#FFF3E6}
+tr.sel td{background:#FDE3CF}
+.p-name{font-weight:900}
+.lv{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:var(--ink);color:#fff}
+.idxbar{display:inline-block;height:8px;border-radius:0 4px 4px 0;background:var(--ink);vertical-align:middle;margin-right:6px}
+.flag{display:inline-block;font-size:11px;font-weight:900;padding:1px 6px;border-radius:4px;background:#FDE3CF;color:#8F3407;margin-left:4px}
+.flag.warn{background:#B4361C;color:#fff}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.delta.up{color:var(--up)}.delta.down{color:var(--down)}
+
+/* heatmap */
+.hm{display:grid;gap:2px;font-size:12px}
+.hm .h{font-weight:900;color:var(--muted);text-align:center;padding:4px 2px;font-size:12px}
+.hm .rl{padding:6px 6px 6px 0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm .c{border-radius:4px;text-align:center;padding:6px 2px;font-weight:700;font-variant-numeric:tabular-nums;cursor:default}
+.hm .c.na{background:repeating-linear-gradient(45deg,#f1e6d6 0 4px,#fbf4ea 4px 8px);color:var(--muted)}
+
+/* strengths */
+.sw{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:600px){.sw{grid-template-columns:1fr}}
+.sw h3{margin:0 0 8px;font-size:14px;font-weight:900}
+.sw ol{margin:0;padding-left:20px;font-size:13px;line-height:1.9}
+.sw b{font-variant-numeric:tabular-nums}
+
+/* completion */
+.cmp-month{margin-bottom:14px}
+.cmp-month h3{margin:0 0 6px;font-size:14px;font-weight:900;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cmp-month h3 small{font-size:12px;color:var(--muted);font-weight:700}
+.cmp{display:grid;grid-template-columns:minmax(120px,1.4fr) repeat(2,minmax(84px,1fr));gap:2px;font-size:12px}
+.cmp .h{font-weight:900;color:var(--muted);padding:4px 6px;text-align:center}
+.cmp .rl{padding:6px 6px 6px 0;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
+.cmp .c{border-radius:4px;text-align:center;padding:6px 4px;font-weight:700;font-variant-numeric:tabular-nums}
+.cmp .c.ok{background:#E3F2E9;color:var(--up)}
+.cmp .c.skip{background:var(--paper);color:var(--muted)}
+.cmp .c.miss{background:repeating-linear-gradient(45deg,#FBE1D9 0 4px,#FDF1EC 4px 8px);color:var(--down)}
+
+/* comments */
+.cm-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.cm-cols{grid-template-columns:1fr}}
+.cm-cols h3{margin:0 0 8px;font-size:14px;font-weight:900;display:flex;align-items:center;gap:8px}
+.cm{background:var(--paper);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:13px;line-height:1.6;border-left:4px solid var(--c,#999)}
+.cm .meta{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:2px}
+.cm-list{max-height:420px;overflow:auto;padding-right:4px}
+.empty{color:var(--muted);font-size:13px;padding:10px 0}
+
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;z-index:50;
+  opacity:0;transition:opacity .1s;max-width:280px;line-height:1.6}
+.tip.show{opacity:1}
+.tip .t{font-weight:900;margin-bottom:2px}
+.tip .row{display:flex;align-items:center;gap:6px}
+.tip .row b{font-size:14px}
+.tip .k{width:12px;height:3px;border-radius:2px;display:inline-block}
+
+/* login */
+.login{max-width:420px;margin:60px auto;text-align:center}
+.login input{font:inherit;font-size:18px;width:100%;border:3px solid var(--ink);border-radius:10px;padding:10px 12px;margin:14px 0;background:var(--paper)}
+.login button{font:inherit;font-weight:900;font-size:18px;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:10px 30px;cursor:pointer}
+.err{color:var(--down);font-weight:700;font-size:13px;min-height:18px}
+.foot{text-align:center;color:#fff;font-weight:700;font-size:13px;margin-top:26px;letter-spacing:1px}
+.note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="tag">360° 評核分析</div>
+      <div class="brand"><div class="circ">P</div><div class="circ">G</div><div class="circ">Y</div><div class="big">學員評核儀表板</div></div>
+      <div class="sub">PGY MONTHLY EVALUATION DASHBOARD・護理長 × 總醫師</div>
+    </div>
+    <div class="hdr-right"><span id="updated"></span><button id="reload" type="button">重新整理</button></div>
+  </header>
+
+  <div id="loginBox" class="card login" hidden>
+    <h2 style="justify-content:center">請輸入儀表板密碼</h2>
+    <input type="password" id="pw" autocomplete="current-password" placeholder="密碼">
+    <div class="err" id="pwErr"></div>
+    <button id="pwBtn" type="button">進入</button>
+  </div>
+
+  <main id="main" hidden>
+    <div class="filters" role="group" aria-label="篩選">
+      <div class="f">期間 <select id="fFrom"></select> ~ <select id="fTo"></select></div>
+      <div class="f">職別 <div class="seg" id="fLevel"><button type="button" data-l="" class="on">全部</button><button type="button" data-l="PGY1">PGY1</button><button type="button" data-l="PGY2">PGY2</button></div></div>
+      <div class="f">學員 <select id="fPgy"></select></div>
+      <div class="f">評核者 <div class="chips" id="fGroups"></div></div>
+      <div class="f">計分 <div class="seg" id="fWeight"><button type="button" data-w="equal" class="on">各身分等權</button><button type="button" data-w="n">依人數</button></div></div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid">
+      <section class="card span12">
+        <h2><span class="no">01</span>每月學員平均分數（依評核者身分）</h2>
+        <p class="desc">每一欄是一個月份的一位學員。圓點＝護理長／總醫師各自給的平均，黑色橫槓＝綜合平均。點一欄可聚焦該位學員。</p>
+        <div class="legend" id="lgMonthly"></div>
+        <div id="chMonthly"></div>
+      </section>
+
+      <section class="card span12">
+        <h2><span class="no">02</span>學員評核總表</h2>
+        <p class="desc" id="tblDesc"></p>
+        <div class="tbl-wrap"><table id="tbl"></table></div>
+      </section>
+
+      <section class="card span7">
+        <h2><span class="no">03</span>10 項細項熱圖</h2>
+        <p class="desc" id="hmDesc"></p>
+        <div id="heatmap"></div>
+      </section>
+
+      <section class="card span5">
+        <h2><span class="no">04</span>相對強項與待加強</h2>
+        <p class="desc" id="swDesc"></p>
+        <div class="sw" id="sw"></div>
+        <h2 style="margin-top:22px"><span class="no">05</span>評分區辨度</h2>
+        <p class="desc">10 題分數全部打同一分的比例。比例越高，代表評核者越可能「一路勾到底」，分數的參考價值越低。</p>
+        <div id="straight"></div>
+      </section>
+
+      <section class="card span12">
+        <h2><span class="no">06</span>填答完成度</h2>
+        <p class="desc">依後台設定的每月學員名單，檢查護理長與總醫師是否都已評核。<b style="color:var(--up)">分數</b>＝已評、<b>略</b>＝勾選本月未共事、<b style="color:var(--down)">未填</b>＝尚未評核，可用來催填。</p>
+        <div id="completion"></div>
+      </section>
+
+      <section class="card span12">
+        <h2><span class="no">07</span>質性回饋</h2>
+        <p class="desc" id="cmDesc"></p>
+        <div class="cm-cols">
+          <div><h3>👍 表現優良之處 <span class="flag" id="cmGoodN"></span></h3><div class="cm-list" id="cmGood"></div></div>
+          <div><h3>🌱 建議加強之處 <span class="flag" id="cmImpN"></span></h3><div class="cm-list" id="cmImp"></div></div>
+        </div>
+      </section>
+    </div>
+
+    <p class="note" style="color:#fff;margin-top:22px" id="footNote"></p>
+  </main>
+  <div class="foot">奇美醫院教學部●一般內科</div>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+/* ======================= 常數 ======================= */
+const A_ITEMS = [
+  ["該醫師對病人與家屬能耐心解釋","耐心解釋病情"],
+  ["該醫師會盡其所能減輕病人的痛苦","減輕病人痛苦"],
+  ["該醫師會主動參與並關心醫院的公共事務","關心公共事務"],
+  ["該醫師會出席並積極參與醫院內部的會議","參與院內會議"],
+  ["該醫師願意和院內同仁討論關於病人病情的知識","討論病情知識"],
+  ["該醫師會提出建設性的建議來改進醫院的服務","提出建設性建議"],
+  ["對於業務上需配合的事情，該醫師會盡力完成","配合業務"],
+  ["該醫師與其他醫療團隊能維持良好的溝通及互動","團隊溝通互動"],
+  ["該醫師會盡可能提供同仁所需的協助","協助同仁"],
+  ["我很樂意和該醫師共事","樂意共事"],
+];
+const GROUPS = [
+  {k:"nurse", n:"護理長", c:"var(--g-nurse)"},
+  {k:"cr",    n:"總醫師", c:"var(--g-cr)"},
+  {k:"other", n:"其他",   c:"var(--g-other)"},
+];
+const ROLE_GROUPS = GROUPS.slice(0,2);   // 完成度只追蹤護理長與總醫師
+const G = Object.fromEntries(GROUPS.map(g=>[g.k,g]));
+function groupOf(role){
+  role = String(role||"");
+  if (role.includes("護理")) return "nurse";
+  if (/總醫師|CR|醫師/i.test(role)) return "cr";
+  return "other";
+}
+
+/* ======================= 工具 ======================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mean = a => { const v = a.filter(x => x!=null && !isNaN(x)); return v.length ? v.reduce((s,x)=>s+x,0)/v.length : null; };
+const fmt = (v,d=1) => v==null ? "—" : v.toFixed(d);
+const monthLabel = m => { const [y,mm]=m.split("-"); return `${+y-1911}/${+mm}`; };
+const monthLong = m => { const [y,mm]=m.split("-"); return `${+y-1911}年${+mm}月`; };
+const normMonth = v => { const m = String(v||"").trim().match(/^(\d{4})[-\/.](\d{1,2})/); return m ? m[1]+"-"+m[2].padStart(2,"0") : ""; };
+const key = r => r.month+"|"+r.pgy;
+
+let RAW = [], ALL = [], ROSTER = {}, DEMO = false;
+let state = { from:"", to:"", pgy:"", level:"", groups:new Set(GROUPS.map(g=>g.k)), weight:"equal", sort:{k:"month",dir:-1} };
+
+/* ======================= 載入資料 ======================= */
+function getKey(){ try{ return sessionStorage.getItem("pgyDashKey") || ""; }catch(e){ return ""; } }
+function setKey(k){ try{ sessionStorage.setItem("pgyDashKey", k); }catch(e){} }
+
+async function load(k){
+  if (!CONFIG.GAS_URL){ DEMO = true; return ready(demoData()); }
+  document.body.classList.add("loading");
+  const url = CONFIG.GAS_URL + "?action=data&key=" + encodeURIComponent(k || "");
+  const j = await (await fetch(url)).json();
+  document.body.classList.remove("loading");
+  if (!j.ok){
+    if (j.error === "auth"){ showLogin(k ? "密碼不正確" : ""); return; }
+    if (j.error === "nopw"){ showLogin("請先在試算表「設定」B3 設定儀表板密碼"); return; }
+    throw new Error(j.error || "讀取失敗");
+  }
+  setKey(k || "");
+  ready(j);
+}
+function ready(j){
+  ROSTER = j.roster || {};
+  ALL = parse(j);
+  RAW = ALL.filter(r => r.scored);
+  $("#loginBox").hidden = true; $("#main").hidden = false;
+  const now = new Date();
+  $("#updated").innerHTML = (DEMO ? `<span class="demo-tag">展示資料</span>` : "") +
+    `資料更新：${now.getHours()}:${String(now.getMinutes()).padStart(2,"0")}・共 ${RAW.length} 份評分`;
+  initFilters(); render();
+}
+function showLogin(msg){
+  $("#main").hidden = true; $("#loginBox").hidden = false; $("#pwErr").textContent = msg || ""; $("#pw").focus();
+}
+$("#pwBtn").addEventListener("click", () => load($("#pw").value.trim()).catch(fail));
+$("#pw").addEventListener("keydown", e => { if (e.key === "Enter") $("#pwBtn").click(); });
+$("#reload").addEventListener("click", () => load(getKey()).catch(fail));
+function fail(e){ console.error(e); alert("讀取資料失敗：" + e.message); document.body.classList.remove("loading"); }
+
+function parse(j){
+  const H = j.headers, ix = n => H.indexOf(n);
+  const iM=ix("評核月份"), iP=ix("受評學員"), iL=ix("學員職別"), iE=ix("評估者姓名"), iRole=ix("評估者身分"), iS=ix("狀態"),
+        iTs=ix("時間戳記"), iGood=ix("表現優良之處"), iImp=ix("建議加強之處");
+  const iA = A_ITEMS.map(([h])=>ix(h));
+  const cell = (r,i) => i < 0 ? "" : String(r[i] ?? "").trim();
+  // 同一月份、同一學員、同一評估者重複送出 → 只保留最新一次（試算表依送出順序排列）
+  const latest = new Map();
+  j.rows.forEach(r => {
+    const a = iA.map(i => { const v = parseFloat(String(r[i] ?? "").replace(/[^\d.]/g,"")); return isNaN(v) ? null : v; });
+    const rec = {
+      month: normMonth(cell(r,iM)), pgy: cell(r,iP), level: /2/.test(cell(r,iL)) ? "PGY2" : "PGY1",
+      evaluator: cell(r,iE), role: cell(r,iRole), status: cell(r,iS) || "已評核", ts: cell(r,iTs),
+      a, good: cell(r,iGood), imp: cell(r,iImp),
+    };
+    rec.group = groupOf(rec.role);
+    rec.aMean = mean(a);
+    rec.low = a.some(v=>v!=null) ? Math.min(...a.filter(v=>v!=null)) : null;
+    rec.scored = rec.status !== "未共事" && rec.aMean != null;
+    rec.straight = a.every(v => v!=null) && new Set(a).size === 1;
+    if (rec.month && rec.pgy) latest.set([rec.month, rec.pgy, rec.role, rec.evaluator].join("|"), rec);
+  });
+  return [...latest.values()];
+}
+
+/* ======================= 篩選 ======================= */
+function allMonths(){ return [...new Set([...ALL.map(r=>r.month), ...Object.keys(ROSTER)])].sort(); }
+function initFilters(){
+  const months = allMonths();
+  if (!months.length){ $("#main").innerHTML = `<div class="card"><div class="empty">目前還沒有任何資料或名單。</div></div>`; return; }
+  const opt = m => `<option value="${m}">${monthLong(m)}</option>`;
+  $("#fFrom").innerHTML = months.map(opt).join(""); $("#fTo").innerHTML = months.map(opt).join("");
+  state.from = state.from && months.includes(state.from) ? state.from : months[Math.max(0, months.length-6)];  // 預設最近 6 個月
+  state.to   = state.to && months.includes(state.to) ? state.to : months[months.length-1];
+  $("#fFrom").value = state.from; $("#fTo").value = state.to;
+  fillPgy();
+  if (initFilters.bound) return;
+  initFilters.bound = true;
+  $("#fGroups").innerHTML = GROUPS.map(g => `<label style="--c:${g.c}"><input type="checkbox" value="${g.k}" ${state.groups.has(g.k)?"checked":""}><span><i></i>${g.n}</span></label>`).join("");
+  $("#fGroups").addEventListener("change", e => { e.target.checked ? state.groups.add(e.target.value) : state.groups.delete(e.target.value); render(); });
+  $("#fFrom").addEventListener("change", e => { state.from = e.target.value; if (state.from > state.to){ state.to = state.from; $("#fTo").value = state.to; } fillPgy(); render(); });
+  $("#fTo").addEventListener("change", e => { state.to = e.target.value; if (state.to < state.from){ state.from = state.to; $("#fFrom").value = state.from; } fillPgy(); render(); });
+  $("#fPgy").addEventListener("change", e => { state.pgy = e.target.value; render(); });
+  $("#fLevel").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return; state.level = b.dataset.l;
+    $("#fLevel").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); fillPgy(); render();
+  });
+  $("#fWeight").addEventListener("click", e => {
+    const w = e.target.dataset.w; if (!w) return; state.weight = w;
+    $("#fWeight").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.w === w)); render();
+  });
+}
+function fillPgy(){
+  const ps = [...new Set(inRange().map(r=>r.pgy))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+  if (state.pgy && !ps.includes(state.pgy)) state.pgy = "";
+  $("#fPgy").innerHTML = `<option value="">全部學員</option>` + ps.map(c=>`<option ${c===state.pgy?"selected":""}>${esc(c)}</option>`).join("");
+}
+const inRange = () => RAW.filter(r => r.month >= state.from && r.month <= state.to && (!state.level || r.level === state.level));
+const scoped = () => inRange().filter(r => state.groups.has(r.group));
+const focus = rows => state.pgy ? rows.filter(r => r.pgy === state.pgy) : rows;
+
+/* 依權重聚合：fn(row) → 數值 */
+function agg(rows, fn){
+  if (state.weight === "n") return mean(rows.map(fn));
+  const by = {}; rows.forEach(r => (by[r.group] ||= []).push(r));
+  return mean(Object.values(by).map(rs => mean(rs.map(fn))));
+}
+
+/* ======================= Tooltip ======================= */
+const tip = $("#tip");
+function showTip(e, html){ tip.innerHTML = html; tip.classList.add("show"); moveTip(e); }
+function moveTip(e){
+  const x = (e.clientX ?? e.target.getBoundingClientRect().right), y = (e.clientY ?? e.target.getBoundingClientRect().top);
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 8, x + 14) + "px";
+  tip.style.top = (y + h + 20 > window.innerHeight ? y - h - 12 : y + 14) + "px";
+}
+function hideTip(){ tip.classList.remove("show"); }
+function bindTips(root){
+  root.querySelectorAll("[data-tip]").forEach(el => {
+    const h = () => el.dataset.tip;
+    el.addEventListener("pointerenter", e => showTip(e, h()));
+    el.addEventListener("pointermove", moveTip);
+    el.addEventListener("pointerleave", hideTip);
+    el.addEventListener("focus", e => showTip(e, h()));
+    el.addEventListener("blur", hideTip);
+  });
+}
+const tipRow = (color, val, label) => `<div class="row"><span class="k" style="background:${color}"></span><b>${val}</b><span>${esc(label)}</span></div>`;
+
+/* ======================= Render ======================= */
+function render(){
+  const rows = scoped();
+  renderKpis(rows); renderMonthly(rows); renderTable(rows); renderHeatmap(rows);
+  renderSW(rows); renderStraight(rows); renderCompletion(); renderComments(rows);
+  $("#footNote").textContent =
+    `計分說明：10 題原始分數 60–95（非常同意 95/90、同意 85/80、普通 75/70、不同意 65/60）。「各身分等權」先算護理長、總醫師各自平均再平均，避免某一身分份數較多而主導結果。` +
+    `「需關注」＝平均低於 ${CONFIG.FLAG_AVG} 分，或任一題被打 ${CONFIG.FLAG_ITEM} 分以下。同一評估者對同一學員重複送出時只採計最新一次；勾選「本月未共事」者不列入評分。評估者姓名不會出現在儀表板。`;
+}
+
+/* 每位學員（月份×姓名）彙整 */
+function keysOf(rows){
+  const m = new Map();
+  rows.forEach(r => { const k = key(r); if (!m.has(k)) m.set(k, {month:r.month, pgy:r.pgy, level:r.level, rows:[]}); m.get(k).rows.push(r); });
+  return [...m.values()].sort((a,b)=> a.month.localeCompare(b.month) || a.pgy.localeCompare(b.pgy,"zh-Hant"));
+}
+function summarize(k){
+  const byG = Object.fromEntries(GROUPS.map(g => { const rs = k.rows.filter(r=>r.group===g.k); return [g.k, rs.length ? mean(rs.map(r=>r.aMean)) : null]; }));
+  const all = agg(k.rows, r=>r.aMean);
+  const itemAvg = A_ITEMS.map((_,i) => agg(k.rows, r=>r.a[i]));
+  let lowI = -1; itemAvg.forEach((v,i) => { if (v!=null && (lowI<0 || v < itemAvg[lowI])) lowI = i; });
+  const minItem = Math.min(...k.rows.map(r=>r.low).filter(v=>v!=null));
+  const flag = (all!=null && all < CONFIG.FLAG_AVG) || minItem <= CONFIG.FLAG_ITEM;
+  return { ...k, byG, all, lowI, lowV: lowI<0 ? null : itemAvg[lowI], minItem, flag };
+}
+
+function renderKpis(rows){
+  const f = focus(rows);
+  const ks = keysOf(f).map(summarize);
+  const by = GROUPS.map(g => [g, f.filter(r=>r.group===g.k).length]).filter(([,n])=>n);
+  const gAvg = g => { const rs = f.filter(r=>r.group===g); return rs.length ? mean(rs.map(r=>r.aMean)) : null; };
+  const c = completionStats();
+  const k = [
+    ["評核份數", f.length, by.map(([g,n])=>`${g.n} ${n}`).join("・") || "—"],
+    ["受評學員（人次）", ks.length, state.pgy ? state.pgy : `${new Set(f.map(r=>r.pgy)).size} 位不同學員`],
+    ["綜合平均", fmt(agg(f, r=>r.aMean)), "滿分 95"],
+    [`<span class="dot" style="background:var(--g-nurse)"></span>護理長平均`, fmt(gAvg("nurse")), `${f.filter(r=>r.group==="nurse").length} 份`],
+    [`<span class="dot" style="background:var(--g-cr)"></span>總醫師平均`, fmt(gAvg("cr")), `${f.filter(r=>r.group==="cr").length} 份`],
+    ["填答完成率", c.total ? Math.round(c.done/c.total*100)+"<small>%</small>" : "—", c.total ? `${c.done} / ${c.total}（${ks.filter(x=>x.flag).length} 人次需關注）` : "名單未設定"],
+  ];
+  $("#kpis").innerHTML = k.map(([l,v,s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${esc(s)}</div></div>`).join("");
+}
+
+/* ---------- 01 每月點圖 ---------- */
+function renderMonthly(rows){
+  const gs = GROUPS.filter(g => state.groups.has(g.k) && rows.some(r=>r.group===g.k));
+  $("#lgMonthly").innerHTML = gs.map(g=>`<span><i style="background:${g.c}"></i>${g.n}</span>`).join("") + `<span><i class="bar"></i>綜合平均</span>`;
+  const ks = keysOf(rows);
+  if (!ks.length){ $("#chMonthly").innerHTML = `<div class="empty">此條件下沒有資料</div>`; return; }
+  ks.forEach(k => {
+    k.g = gs.map(g => { const rs = k.rows.filter(r=>r.group===g.k); return {g, n:rs.length, v: rs.length ? mean(rs.map(r=>r.aMean)) : null}; });
+    k.all = agg(k.rows, r=>r.aMean);
+  });
+  const vals = ks.flatMap(k => [k.all, ...k.g.map(x=>x.v)]).filter(v=>v!=null);
+  let lo = Math.floor(Math.min(...vals)/5)*5, hi = 95; if (hi - lo < 20) lo = hi - 20; lo = Math.max(60, lo);
+  const W = Math.max(ks.length*72, 640), H = 300, m = {l:40,r:10,t:26,b:52};
+  const iw = W-m.l-m.r, ih = H-m.t-m.b, step = iw/ks.length;
+  const y = v => m.t + ih - (v-lo)/(hi-lo)*ih;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${Math.min(W,640)}px" role="img" aria-label="每月學員平均分數點圖"><g class="axis">`;
+  for (let t=lo; t<=hi; t+=5) s += `<line class="grid-line" x1="${m.l}" x2="${W-m.r}" y1="${y(t)}" y2="${y(t)}"/><text x="${m.l-6}" y="${y(t)+4}" text-anchor="end">${t}</text>`;
+  if (CONFIG.FLAG_AVG > lo) s += `<line x1="${m.l}" x2="${W-m.r}" y1="${y(CONFIG.FLAG_AVG)}" y2="${y(CONFIG.FLAG_AVG)}" stroke="var(--down)" stroke-dasharray="4 4" stroke-width="1.5"/><text x="${W-m.r}" y="${y(CONFIG.FLAG_AVG)-4}" text-anchor="end" fill="var(--down)" font-size="11" font-weight="700">關注線 ${CONFIG.FLAG_AVG}</text>`;
+  s += `</g>`;
+  let lastMonth = "";
+  ks.forEach((k,i) => {
+    const cx = m.l + step*i + step/2;
+    if (k.month !== lastMonth && i > 0) s += `<line x1="${m.l+step*i}" x2="${m.l+step*i}" y1="${m.t}" y2="${H-m.b+38}" stroke="var(--hair)" stroke-width="2"/>`;
+    const dim = state.pgy && k.pgy !== state.pgy;
+    if (state.pgy && !dim) s += `<rect x="${cx-step/2+3}" y="${m.t-4}" width="${step-6}" height="${ih+44}" rx="8" fill="#FDE3CF"/>`;
+    s += `<g opacity="${dim ? .3 : 1}">`;
+    const pts = k.g.filter(x=>x.v!=null);
+    if (pts.length > 1){ const vs = pts.map(x=>x.v); s += `<line x1="${cx}" x2="${cx}" y1="${y(Math.max(...vs))}" y2="${y(Math.min(...vs))}" stroke="#B9A78F" stroke-width="2"/>`; }
+    const n = pts.length; pts.forEach((x,j) => {
+      const ox = cx + (j-(n-1)/2)*7;
+      s += `<circle cx="${ox}" cy="${y(x.v)}" r="5.5" fill="${x.g.c}" stroke="var(--card)" stroke-width="2"/>`;
+    });
+    if (k.all!=null) s += `<line x1="${cx-14}" x2="${cx+14}" y1="${y(k.all)}" y2="${y(k.all)}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>`;
+    if (k.all!=null) s += `<text x="${cx}" y="${y(k.all)-9}" text-anchor="middle" font-size="11" font-weight="900" fill="var(--ink)">${fmt(k.all)}</text>`;
+    s += `<text x="${cx}" y="${H-m.b+18}" text-anchor="middle" font-size="11" fill="var(--muted)">${k.month !== lastMonth ? monthLabel(k.month) : ""}</text>`;
+    s += `<text x="${cx}" y="${H-m.b+34}" text-anchor="middle" font-size="12" font-weight="900" fill="var(--ink)">${esc(k.pgy)}</text></g>`;
+    lastMonth = k.month;
+    const tipHtml = `<div class="t">${monthLong(k.month)}・${esc(k.pgy)}（${k.level}）</div>` + tipRow("#fff", fmt(k.all), `綜合（${k.rows.length} 份）`) +
+      k.g.filter(x => x.n).map(x => tipRow(x.g.c, fmt(x.v), `${x.g.n}（${x.n} 份）`)).join("");
+    s += `<rect class="hit" tabindex="0" x="${cx-step/2}" y="${m.t}" width="${step}" height="${ih+40}" data-tip="${esc(tipHtml)}" data-p="${esc(k.pgy)}"/>`;
+  });
+  s += `</svg>`;
+  $("#chMonthly").innerHTML = `<div style="overflow-x:auto">${s}</div>`;
+  bindTips($("#chMonthly"));
+  $("#chMonthly").querySelectorAll(".hit").forEach(h => h.addEventListener("click", () => selectPgy(h.dataset.p)));
+}
+function selectPgy(p){ state.pgy = state.pgy === p ? "" : p; fillPgy(); render(); }
+
+/* ---------- 02 總表 ---------- */
+function renderTable(rows){
+  const all = keysOf(rows).map(summarize);
+  // 與同月份其他學員平均的差距
+  const monthAvg = {};
+  [...new Set(all.map(k=>k.month))].forEach(m => monthAvg[m] = mean(all.filter(k=>k.month===m).map(k=>k.all)));
+  let ks = all.map(k => ({ ...k, nurse:k.byG.nurse, cr:k.byG.cr, n:k.rows.length,
+    gap: k.byG.nurse!=null && k.byG.cr!=null ? k.byG.nurse - k.byG.cr : null,
+    vs: k.all!=null && monthAvg[k.month]!=null && all.filter(x=>x.month===k.month).length > 1 ? k.all - monthAvg[k.month] : null }));
+  if (state.pgy) ks = ks.filter(k => k.pgy === state.pgy);
+  $("#tblDesc").textContent = state.pgy
+    ? `${state.pgy} 各月份的評核結果。再點一次該列可取消聚焦。`
+    : `點欄位標題可排序；點一列可聚焦該位學員看細項。「vs 同月」＝與同月份其他學員平均的差距。`;
+  const {k:sk, dir} = state.sort;
+  ks.sort((x,y) => { const a=x[sk], b=y[sk]; if (a==null) return 1; if (b==null) return -1; return (typeof a === "string" ? a.localeCompare(b,"zh-Hant") : a-b) * dir; });
+  const cols = [["month","月份"],["pgy","學員"],["level","職別"],["n","份數",1],["nurse","護理長",1],["cr","總醫師",1],["gap","護理長−總醫師",1],["all","綜合平均",1],["vs","vs 同月",1],["lowV","最低細項"],["flag","狀態"]];
+  let h = `<thead><tr>${cols.map(([k,l,num])=>`<th class="${num?"num":""}" data-k="${k}" ${sk===k?`aria-sort="${dir>0?"ascending":"descending"}"`:""}>${l}</th>`).join("")}</tr></thead><tbody>`;
+  const sign = (v,d=1) => v==null ? "—" : `<span class="delta ${v>0.5?"up":v<-0.5?"down":""}">${v>0?"+":""}${fmt(v,d)}</span>`;
+  ks.forEach(r => {
+    h += `<tr data-p="${esc(r.pgy)}" class="${state.pgy===r.pgy?"sel":""}" style="cursor:pointer">
+      <td>${monthLong(r.month)}</td><td class="p-name">${esc(r.pgy)}</td><td><span class="lv">${r.level}</span></td><td class="num">${r.n}</td>
+      <td class="num">${fmt(r.nurse)}</td><td class="num">${fmt(r.cr)}</td><td class="num">${sign(r.gap)}</td>
+      <td class="num"><span class="idxbar" style="width:${r.all==null?0:Math.max(2,(r.all-60)/35*60)}px"></span><b>${fmt(r.all)}</b></td>
+      <td class="num">${sign(r.vs)}</td>
+      <td>${r.lowI<0?"—":`${A_ITEMS[r.lowI][1]} <b>${fmt(r.lowV)}</b>`}</td>
+      <td>${r.flag ? `<span class="flag warn">⚠ 需關注</span>` : `<span style="color:var(--up);font-weight:700">✓ 正常</span>`}</td></tr>`;
+  });
+  h += `</tbody>`;
+  $("#tbl").innerHTML = ks.length ? h : `<tr><td class="empty">此條件下沒有資料</td></tr>`;
+  $("#tbl").querySelectorAll("th").forEach(th => th.addEventListener("click", () => {
+    const k = th.dataset.k; state.sort = { k, dir: state.sort.k===k ? -state.sort.dir : (["pgy","month","level"].includes(k) ? 1 : -1) }; renderTable(scoped());
+  }));
+  $("#tbl").querySelectorAll("tbody tr[data-p]").forEach(tr => tr.addEventListener("click", () => selectPgy(tr.dataset.p)));
+}
+
+/* ---------- 03 熱圖 ---------- */
+function itemStats(rows){
+  return A_ITEMS.map(([,label],i) => ({ label, get:r=>r.a[i],
+    byG: Object.fromEntries(GROUPS.map(g => { const rs = rows.filter(r=>r.group===g.k); return [g.k, {n:rs.length, v: rs.length ? mean(rs.map(r=>r.a[i])) : null}]; })),
+    all: agg(rows, r=>r.a[i]) }));
+}
+function heatColor(v){ // 單一橘色色階：分數越高越深（70→淺、95→深）
+  if (v==null) return null;
+  const t = Math.max(0, Math.min(1, (v-70)/25));
+  const L = [ [247,236,222], [242,146,79], [143,52,7] ];
+  const mix = (a,b,u)=>a.map((x,i)=>Math.round(x+(b[i]-x)*u));
+  const c = t<.5 ? mix(L[0],L[1],t*2) : mix(L[1],L[2],(t-.5)*2);
+  return {bg:`rgb(${c})`, fg: t>.55 ? "#fff" : "var(--ink)"};
+}
+function renderHeatmap(rows){
+  const f = focus(rows), gs = GROUPS.filter(g => state.groups.has(g.k) && f.some(r=>r.group===g.k));
+  const st = itemStats(f), base = state.pgy ? itemStats(rows) : null;
+  $("#hmDesc").textContent = state.pgy
+    ? `${state.pgy} 在各細項、各身分眼中的平均（${f.length} 份）。最右欄為與同期間全體學員平均的差距。顏色越深＝分數越高。`
+    : `同期間全體學員的細項平均，依評核者身分分欄。顏色越深＝分數越高。選一位學員可看個人細項。`;
+  const cols = gs.length + 1 + (base?1:0);
+  let h = `<div class="hm" style="grid-template-columns:minmax(96px,1.3fr) repeat(${cols}, minmax(56px,1fr))"><div></div>`;
+  gs.forEach(g => h += `<div class="h"><span class="dot" style="background:${g.c}"></span>${g.n}</div>`);
+  h += `<div class="h">綜合</div>` + (base?`<div class="h">vs 全體</div>`:"");
+  st.forEach((it,i) => {
+    h += `<div class="rl" title="${esc(A_ITEMS[i][0])}">${esc(it.label)}</div>`;
+    const cell = (v, n, who) => {
+      if (v==null) return `<div class="c na">—</div>`;
+      const c = heatColor(v);
+      return `<div class="c" tabindex="0" style="background:${c.bg};color:${c.fg}" data-tip="${esc(`<div class='t'>${A_ITEMS[i][0]}</div>`+tipRow(c.bg, fmt(v), `${who}（${n} 份）`))}">${fmt(v)}</div>`;
+    };
+    gs.forEach(g => h += cell(it.byG[g.k].v, it.byG[g.k].n, g.n));
+    h += cell(it.all, f.length, "綜合");
+    if (base){
+      const d = it.all!=null && base[i].all!=null ? it.all - base[i].all : null;
+      h += `<div class="c delta ${d==null?"":d>0.5?"up":d<-0.5?"down":""}" style="background:var(--card)">${d==null?"—":(d>0?"▲ +":d<0?"▼ ":"")+fmt(d)}</div>`;
+    }
+  });
+  h += `</div>`;
+  $("#heatmap").innerHTML = f.length ? h : `<div class="empty">此條件下沒有資料</div>`;
+  bindTips($("#heatmap"));
+}
+
+/* ---------- 04 強項 / 待加強 ---------- */
+function renderSW(rows){
+  const f = focus(rows);
+  if (!f.length){ $("#sw").innerHTML = `<div class="empty">此條件下沒有資料</div>`; $("#swDesc").textContent=""; return; }
+  const st = itemStats(f);
+  let list;
+  if (state.pgy){
+    const base = itemStats(rows);
+    list = st.map((it,i) => ({label:it.label, z: it.all - base[i].all, raw: it.all})).filter(x=>!isNaN(x.z) && x.raw!=null);
+    $("#swDesc").textContent = `${state.pgy} 各細項與同期間全體學員平均相比，高出最多與低最多的項目。`;
+  } else {
+    list = st.map(it => ({label:it.label, z: it.all, raw: it.all})).filter(x=>x.z!=null);
+    $("#swDesc").textContent = `全體學員在 10 個細項中平均最高與最低的項目，可作為 PGY 教學的共同重點。`;
+  }
+  list.sort((a,b)=>b.z-a.z);
+  const top = list.slice(0,3), bot = list.slice(-3).reverse();
+  const li = (x, rel) => `<li>${esc(x.label)}　<b>${fmt(x.raw)}</b>${rel?` <span class="delta ${x.z>0?"up":"down"}">(${x.z>0?"+":""}${fmt(x.z)})</span>`:""}</li>`;
+  $("#sw").innerHTML = `<div><h3>💪 相對強項</h3><ol>${top.map(x=>li(x,!!state.pgy)).join("")}</ol></div>
+    <div><h3>🎯 可加強</h3><ol>${bot.map(x=>li(x,!!state.pgy)).join("")}</ol></div>`;
+}
+
+/* ---------- 05 區辨度 ---------- */
+function renderStraight(rows){
+  const f = focus(rows);
+  const gs = GROUPS.filter(g => f.some(r=>r.group===g.k));
+  if (!gs.length){ $("#straight").innerHTML = `<div class="empty">此條件下沒有資料</div>`; return; }
+  $("#straight").innerHTML = gs.map(g => {
+    const rs = f.filter(r=>r.group===g.k && r.a.every(v=>v!=null)); const p = rs.length ? rs.filter(r=>r.straight).length/rs.length*100 : 0;
+    return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13px">
+      <span style="width:64px;font-weight:700"><span class="dot" style="background:${g.c}"></span>${g.n}</span>
+      <span style="flex:1;height:12px;background:var(--paper);border-radius:0 4px 4px 0;position:relative">
+        <span style="position:absolute;left:0;top:0;bottom:0;width:${p}%;background:${g.c};border-radius:0 4px 4px 0"></span></span>
+      <b style="width:76px;text-align:right;font-variant-numeric:tabular-nums">${Math.round(p)}%<small style="color:var(--muted);font-weight:500"> /${rs.length}</small></b></div>`;
+  }).join("");
+}
+
+/* ---------- 06 填答完成度 ---------- */
+function completionData(){
+  // 名單以後台設定為準；該月沒設定名單時，以實際收到的評核推回名單
+  const months = allMonths().filter(m => m >= state.from && m <= state.to).reverse();
+  return months.map(m => {
+    let list = (ROSTER[m] || []).map(s => ({ name:s.name, level: /2/.test(s.level) ? "PGY2" : "PGY1" }));
+    const fromRoster = list.length > 0;
+    if (!fromRoster){
+      const seen = new Map(); ALL.filter(r=>r.month===m).forEach(r => seen.set(r.pgy, r.level));
+      list = [...seen].map(([name, level]) => ({ name, level }));
+    }
+    if (state.level) list = list.filter(s => s.level === state.level);
+    if (state.pgy) list = list.filter(s => s.name === state.pgy);
+    const people = list.map(s => ({ ...s, cells: ROLE_GROUPS.map(g => {
+      const rs = ALL.filter(r => r.month===m && r.pgy===s.name && r.group===g.k);
+      const sc = rs.filter(r=>r.scored);
+      if (sc.length) return { st:"ok", v: mean(sc.map(r=>r.aMean)), n: sc.length };
+      if (rs.length) return { st:"skip" };
+      return { st:"miss" };
+    })}));
+    return { m, fromRoster, people };
+  }).filter(x => x.people.length);
+}
+function completionStats(){
+  let done = 0, total = 0;
+  completionData().forEach(x => x.people.forEach(p => p.cells.forEach((c,j) => {
+    if (!state.groups.has(ROLE_GROUPS[j].k)) return;
+    total++; if (c.st !== "miss") done++;
+  })));
+  return { done, total };
+}
+function renderCompletion(){
+  const data = completionData();
+  if (!data.length){ $("#completion").innerHTML = `<div class="empty">此期間沒有名單或資料</div>`; return; }
+  $("#completion").innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px 22px">` + data.map(x => {
+    const cnt = ROLE_GROUPS.map((g,j) => `${g.n} ${x.people.filter(p=>p.cells[j].st!=="miss").length}/${x.people.length}`).join("・");
+    return `<div class="cmp-month"><h3>${monthLong(x.m)}<small>${cnt}${x.fromRoster ? "" : "・未設定名單（依收到的評核列出）"}</small></h3>
+      <div class="cmp"><div></div>${ROLE_GROUPS.map(g=>`<div class="h"><span class="dot" style="background:${g.c}"></span>${g.n}</div>`).join("")}
+      ${x.people.map(p => `<div class="rl" data-p="${esc(p.name)}"><span class="lv">${p.level}</span>${esc(p.name)}</div>` + p.cells.map(c =>
+        c.st==="ok" ? `<div class="c ok">✓ ${fmt(c.v)}${c.n>1?`<small>（${c.n}）</small>`:""}</div>` :
+        c.st==="skip" ? `<div class="c skip">略</div>` : `<div class="c miss">✗ 未填</div>`).join("")).join("")}
+      </div></div>`;
+  }).join("") + `</div>`;
+  $("#completion").querySelectorAll(".rl[data-p]").forEach(el => el.addEventListener("click", () => selectPgy(el.dataset.p)));
+}
+
+/* ---------- 07 質性回饋 ---------- */
+function renderComments(rows){
+  const f = focus(rows).slice().sort((a,b)=> b.month.localeCompare(a.month) || b.ts.localeCompare(a.ts));
+  const junk = s => !s || /^(無|沒有|none|n\/a|-|\.|test)+$/i.test(s.replace(/\s/g,""));
+  const good = f.filter(r=>!junk(r.good)), imp = f.filter(r=>!junk(r.imp));
+  $("#cmDesc").textContent = (state.pgy ? `${state.pgy} 收到的文字回饋。` : `全部學員收到的文字回饋（新到舊）；選一位學員可只看他／她的。`) + "只顯示評核者身分，不顯示姓名。";
+  const card = (r, txt) => `<div class="cm" style="--c:${G[r.group].c}"><div class="meta">${monthLong(r.month)}・${esc(r.pgy)}（${r.level}）・${esc(r.role||G[r.group].n)}</div>${esc(txt)}</div>`;
+  $("#cmGood").innerHTML = good.map(r=>card(r,r.good)).join("") || `<div class="empty">尚無回饋</div>`;
+  $("#cmImp").innerHTML = imp.map(r=>card(r,r.imp)).join("") || `<div class="empty">尚無回饋</div>`;
+  $("#cmGoodN").textContent = good.length; $("#cmImpN").textContent = imp.length;
+}
+
+/* ======================= 展示資料（未設定 GAS_URL 時使用，姓名皆為虛構） ======================= */
+function demoData(){
+  const headers = ["時間戳記","批次編號","評核月份","受評學員","學員職別","評估者姓名","評估者身分","狀態",...A_ITEMS.map(x=>x[0]),"表現優良之處","建議加強之處"];
+  const roster = {
+    "2026-07": [{name:"王小明",level:"PGY1"},{name:"李小華",level:"PGY1"},{name:"陳大同",level:"PGY2"}],
+    "2026-08": [{name:"林美玲",level:"PGY1"},{name:"張志強",level:"PGY1"},{name:"黃怡君",level:"PGY1"},{name:"吳建宏",level:"PGY2"}],
+    "2026-09": [{name:"周佳穎",level:"PGY1"},{name:"鄭宇翔",level:"PGY1"},{name:"許雅婷",level:"PGY2"}],
+    "2026-10": [{name:"蔡承恩",level:"PGY1"},{name:"劉思妤",level:"PGY1"},{name:"楊冠廷",level:"PGY1"},{name:"謝欣怡",level:"PGY2"}],
+  };
+  let seed = 7; const rnd = () => (seed = (seed*9301+49297)%233280)/233280;
+  const pick = base => { const v = base + (rnd()<.5 ? 0 : rnd()<.5 ? -5 : 5); return String(Math.max(60, Math.min(95, Math.round(v/5)*5))); };
+  const goods = ["主動關心病人，交班清楚","對護理師的詢問回應迅速","病歷書寫完整，學習態度積極","值班時處理問題沉著",""];
+  const imps = ["可再加強與家屬的溝通","醫囑開立後可再主動告知護理站","會議出席可以更準時","",""];
+  const rows = [];
+  Object.entries(roster).forEach(([m, list], mi) => list.forEach((s, si) => {
+    const ability = 84 + ((si*7+mi*3)%4)*3 - (s.name==="張志強" ? 9 : 0);
+    [["林護理長","護理長"],["蕭總醫師","總醫師"]].forEach(([ev, role], ri) => {
+      if (m === "2026-10" && ri === 0 && si >= 2) return;                // 10 月護理長尚未填完
+      if (m === "2026-08" && ri === 1 && si === 3) { rows.push([`${m}-28 10:00:00`,"demo",m,s.name,s.level,ev,role,"未共事",...A_ITEMS.map(()=>""),"",""]); return; }
+      const straight = rnd() < .2, base = ability + (ri ? 2 : -1);
+      const a = straight ? A_ITEMS.map(()=>String(Math.round(base/5)*5)) : A_ITEMS.map((_,i)=>pick(base - (i===2||i===5 ? 4 : 0)));
+      rows.push([`${m}-${25+ri} 09:${10+si}:00`,"demo",m,s.name,s.level,ev,role,"已評核",...a,goods[(si+ri+mi)%goods.length],imps[(si+mi+ri*2)%imps.length]]);
+    });
+  }));
+  return { ok:true, headers, rows, roster };
+}
+
+/* ======================= 啟動 ======================= */
+load(getKey()).catch(fail);
+</script>
+</body>
+</html>
